@@ -40,9 +40,10 @@
   pdfsubject={eGRID and ACS}, %
   pdfkeywords={eGRID, ACS, Census, APEEP, Holyoke} }
 
-\title{eGRID Electrical Generation and Emissions Data from U.S. EPA\\ And ACS Small-Area Socioeconomic Data from the U.S. Bureau of the Census}
+\title{eGRID Electrical Generation and Emissions Data\\ From U.S. EPA\\ And ACS Small-Area Socioeconomic Data from the U.S. Bureau of the Census\\
+Tools for Environmental Justice and other Socio-Technical Energy Research in the United States}
 \author{Michael Ash\thanks{Department of Economics, School of Public Policy, Political Economy Research Institute, University of Massachusetts Amherst, \href{mailto:mash@umass.edu}{\tt mash@umass.edu}}}
-\date{September 25, 2023}
+\date{September 11, 2023}
 
 \begin{document}
 \maketitle
@@ -50,7 +51,7 @@
 
 \begin{center}
   \fbox{\fbox{\parbox{6in}{
-        Learning objectives, directions, and scavenger hunt for session. Introduction to Electrical Generation and Emissions Data from U.S. EPA. Introduction to small-area data from the U.S. Bureau of the Census.  The code and data for this introduction are available from the GitHub repository \url{https://github.com/michaelaoash/ELEVATE-Golbon-Ash-2023}.
+        Learning objectives, directions, and scavenger hunt for session. Introduction to Electrical Generation and Emissions Data from U.S. EPA. Introduction to small-area data from the U.S. Bureau of the Census.  The code and data for this introduction are available from the GitHub repository \url{https://github.com/michaelaoash/ELEVATE-census-egrid-intro}.
       }  }}
 \end{center}
 
@@ -78,7 +79,7 @@
 
   \begin{questions}
     
-  \question Advance preparation. These exercises require an installation of the R statistical software, including the \texttt{tidyverse} suite of packages, the spatial and GIS packages \texttt{sp} and \texttt{sf}, and the specialized Census data packages \texttt{tidycensus} and \texttt{tigris}.  Please install R and these packages. (All are free and open source).
+  \question Advance preparation. These exercises require an installation of the R statistical software (\url{https://www.r-project.org/}), including the \texttt{tidyverse} suite of packages, the spatial and GIS packages \texttt{sp} and \texttt{sf}, and the specialized Census data packages \texttt{tidycensus} and \texttt{tigris}.  Please install R and these packages. (R and all of the packages are free, open source, and available across platforms. ELEVATE peers or mentors may be able to help with installation.) 
 
 \question Visit the website for the ``historical'' eGRID data \url{https://www.epa.gov/egrid/historical-egrid-data}.  We will use the 2020 data because supplemental data on Particulate Matter emissions (\url{https://www.epa.gov/egrid/egrid-related-materials}) are available for 2020 (but not yet for 2021).  Download the metric and non-metric Excel data.  Also download the eGRID PM2.5 Data.  (The downloads are already included in the GitHub repository, and you can skip the download step if you have already downloaded the repository.) Open the spreadsheets in Excel or another spreadsheet program to examine the data, but \emph{do not modify} the data in any way.
 
