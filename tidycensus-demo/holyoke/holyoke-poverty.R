@@ -17,13 +17,14 @@ census_api_key("cb9bd8756de7ba64b3c95ec0bd9193fc98d7cfe1")
 
 setwd("tidycensus-demo/holyoke/")
 
-## Variable list
+## Variable list for American Community Survey (ACS) of the U.S. Bureau of the Census
+## Looking for variables with grep
 acs_v2020 <- load_variables(2020, "acs5", cache = TRUE)
-acs_v2020 %>% filter(grepl("B17010[AB]_((004)|(011)|(017)|(024)|(031)|(037))",name)) %>% select(label)
-acs_v2020 %>% filter(grepl("B17010._(004)",name))
-
 acs_v2020 %>% filter(grepl("poverty level.*family.*With related children of the householder under 18 years:$",label),
                      !grepl("INDIAN|ASIAN|PACIFIC|RACE",concept))  %>% print(n=40)
+
+acs_v2020 %>% filter(grepl("B17010[AB]_((004)|(011)|(017)|(024)|(031)|(037))",name)) %>% select(label)
+acs_v2020 %>% filter(grepl("B17010._(004)",name))
 
 ## Get the blockgroups from ACS
 ## Family poverty counts are available at the Block Group Level
