@@ -16,7 +16,7 @@ options(rlang_backtrace_on_error = "none")
 ## https://api.census.gov/data/key_signup.html
 census_api_key("cb9bd8756de7ba64b3c95ec0bd9193fc98d7cfe1")
 
-## setwd("tidycensus-demo/holyoke/")  ## Possibly not needed.
+setwd("tidycensus-demo/holyoke/")  ## Possibly not needed.
 
 ## Variable list for American Community Survey (ACS) of the U.S. Bureau of the Census
 ## Looking for variables with grep
