@@ -40,7 +40,7 @@
   pdfsubject={eGRID and ACS}, %
   pdfkeywords={eGRID, ACS, Census, APEEP, Holyoke} }
 
-\title{eGRID Electrical Generation and Emissions Data\\ From U.S. EPA\\ And ACS Small-Area Socioeconomic Data from the U.S. Bureau of the Census\\
+\title{eGRID Electrical Generation and Emissions Data\\ From U.S. EPA\\ And ACS Small-Area Socioeconomic Data from the U.S. Bureau of the Census:\\
 Tools for Environmental Justice and other Socio-Technical Energy Research in the United States}
 \author{Michael Ash\thanks{Department of Economics, School of Public Policy, Political Economy Research Institute, University of Massachusetts Amherst, \href{mailto:mash@umass.edu}{\tt mash@umass.edu}}}
 \date{September 11, 2023}
@@ -71,8 +71,9 @@ Tools for Environmental Justice and other Socio-Technical Energy Research in the
     \begin{itemize}
   \item \textbf{Questions for Reflection}
   \item What social, economic, environmental, or energy variables might be useful on a small-area basis? What are questions that we might answer with small-area data? What kind of relationships can we explore with small-area data, for example, between toxic exposures and test scores, between poverty rates and energy bills, between voter participation and enforcement of environmental regulations?
-  \item Are these variables available from eGRID, ACS, or other datasets? How do you find the documentation?
-  \item What are some of the advantages and disadvantages of the Census small-area geography of Tracts and Block Groups? What are some alternatives and the advantages and disadvantages of each?
+  \item Are some of these variables available from eGRID, ACS, or other datasets? How do you find the documentation?
+  \item What are some of the advantages and disadvantages of the Census small-area geography of Tracts and Block Groups? What are some alternative geographies for small-area analysis, and what are the advantages and disadvantages of each?
+  \item In our maps, the entirety of each Block Group (``neighborhood'') was coded with one value of the poverty rate. Why might that pose a problem for some applications?
   \item eGRID lists electrical generators.  How complete is the coverage? (Can you name a generator that is not included? How do tabulated totals, e.g., for generation, compare to reported totals from other sources?)  The eGRID data are annual; is that frequency appropriate for the questions that you investigate?
   \end{itemize}
   
@@ -100,7 +101,10 @@ Tools for Environmental Justice and other Socio-Technical Energy Research in the
 
   \question We will use the American Community Survey (ACS) 5-year data (pooling survey results from 2016--2020, which permits analysis of small areas such as Census Tracts and Census Block Groups.  The ACS is a household survey that asks each sampled household questions about demographics and income.  We will focus on the determination of poverty based on household composition and income and compute poverty rates for families with children for Census Block Groups (similar to neighborhoods) in Holyoke.
 
-  \question First we find the relevant variables.  Then we use \texttt{tidycensus} to download the count variables directly from the ACS website at the U.S. Bureau of the Census, and we compute the poverty rate from the poverty counts. It is always helpful to look at the data at intermediate steps.  Geographic data which enables map plotting is included with the economic and demographic variables. 
+  \question First we find the relevant variables.  We download and store the codebook for the ACS with the \texttt{load\_variables()} function in \texttt{tidycensus}. The codebook has four columns: the \textbf{name} of each variable (typically a letter followed by 5 numbers, sometimes an additional letter, followed by an underscore followed by 3 more numbers); a \textbf{label} that explains exactly what the variable expresses; a \textbf{concept} that describes the broad area of interest, and \textbf{geography} that specifies the smallest area for which the variable is available.
+    We can filter the codebook with the \texttt{filter()} function and use \texttt{grepl()} to identify words or phrases of interest. The syntax is \texttt{grepl("text to search for", variable to search for the text)}.  There are roughly 30,000 variables in the ACS; most of them are \emph{counts} of people in a specific category but some are average or median values. Record the names of the variables that you need. \textbf{Challenges:} How many variables are available only down to the Tract level, and how many variables are available down to the Block Group level? What variables related to household energy use are available from ACS? (What search terms did you use?)
+
+  \question Then we use \texttt{tidycensus} to download the needed variables directly from the ACS website at the U.S. Bureau of the Census, and we compute the poverty rate from the poverty counts. It is always helpful to look at the data at intermediate steps.  Geographic data which enables map plotting is included with the economic and demographic variables.  \textbf{Challenge:} Are data available for Puerto Rico?
 
   \question How big are Block Groups?  Look at the map of Holyoke with Block Groups indicated.  If you have been to Holyoke, estimate how long would it take you to walk across a downtown Block Group.  Is there variation in the area and population of Block Groups?  How many households are there in some of the Block Groups of Holyoke?
     
