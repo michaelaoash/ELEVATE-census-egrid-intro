@@ -56,7 +56,7 @@ ma_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="M
                                   )
 
 
-ma_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="PR", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
+pr_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="PR", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
                                   variables = c(
                                       "B17010_004",
                                       "B17010_011",
