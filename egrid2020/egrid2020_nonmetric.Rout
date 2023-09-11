@@ -1,0 +1,739 @@
+> library(here)
+here() starts at /home/mash/Desktop/ETI/ELEVATE-census-egrid-intro
+> library(tidyverse)
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.2     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+✔ purrr     1.0.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+> library(janitor)
+
+Attaching package: ‘janitor’
+
+The following objects are masked from ‘package:stats’:
+
+    chisq.test, fisher.test
+
+> options(dplyr.width=Inf, dplyr.print_max=Inf, scipen=10000)
+> library(readxl)
+> options(width=200)
+> 
+> 
+> ## APEEP marginal damage values ($/ton)  [Note 1.10231 tons/mt not needed here]
+> M2014  <- read_csv(here("egrid2020", "md_M_2014_DR-Krewski_VRMR-9186210.csv"), 
++                    col_names = c("NH3_M_2014", "NOx_M_2014", "PM25_M_2014", "SO2_M_2014", "VOC_M_2014"))
+Rows: 3109 Columns: 5
+── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+Delimiter: ","
+dbl (5): NH3_M_2014, NOx_M_2014, PM25_M_2014, SO2_M_2014, VOC_M_2014
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+> md2011  <- read_xlsx(here("egrid2020", "md_2011.xlsx"),sheet=2, col_types=c("text","guess","guess","guess","guess","guess"))
+> apeep  <- bind_cols(md2011,M2014)
+> apeep <- apeep %>% mutate(
++                        FIPS = str_pad(as.character(fips),width=5,pad="0")
++                        )
+> 
+> excel_sheets(here("egrid2020", "egrid2020_data.xlsx"))
+ [1] "Contents" "UNT20"    "GEN20"    "PLNT20"   "ST20"     "BA20"     "SRL20"    "NRL20"    "US20"     "GGL20"   
+> 
+> (nms <- names(read_excel(here("egrid2020", "egrid2020_data.xlsx"), sheet=4, skip=1, n_max = 0)))
+  [1] "SEQPLT20"  "YEAR"      "PSTATABB"  "PNAME"     "ORISPL"    "OPRNAME"   "OPRCODE"   "UTLSRVNM"  "UTLSRVID"  "SECTOR"    "BANAME"    "BACODE"    "NERC"      "SUBRGN"    "SRNAME"    "ISORTO"   
+ [17] "FIPSST"    "FIPSCNTY"  "CNTYNAME"  "LAT"       "LON"       "NUMUNT"    "NUMGEN"    "PLPRMFL"   "PLFUELCT"  "COALFLAG"  "CAPFAC"    "NAMEPCAP"  "NBFACTOR"  "RMBMFLAG"  "CHPFLAG"   "USETHRMO" 
+ [33] "PWRTOHT"   "ELCALLOC"  "PSFLAG"    "PLHTIAN"   "PLHTIOZ"   "PLHTIANT"  "PLHTIOZT"  "PLNGENAN"  "PLNGENOZ"  "PLNOXAN"   "PLNOXOZ"   "PLSO2AN"   "PLCO2AN"   "PLCH4AN"   "PLN2OAN"   "PLCO2EQA" 
+ [49] "PLHGAN"    "PLNOXRTA"  "PLNOXRTO"  "PLSO2RTA"  "PLCO2RTA"  "PLCH4RTA"  "PLN2ORTA"  "PLC2ERTA"  "PLHGRTA"   "PLNOXRA"   "PLNOXRO"   "PLSO2RA"   "PLCO2RA"   "PLCH4RA"   "PLN2ORA"   "PLC2ERA"  
+ [65] "PLHGRA"    "PLNOXCRT"  "PLNOXCRO"  "PLSO2CRT"  "PLCO2CRT"  "PLCH4CRT"  "PLN2OCRT"  "PLC2ECRT"  "PLHGCRT"   "UNNOX"     "UNNOXOZ"   "UNSO2"     "UNCO2"     "UNCH4"     "UNN2O"     "UNHG"     
+ [81] "UNHTI"     "UNHTIOZ"   "UNHTIT"    "UNHTIOZT"  "UNNOXSRC"  "UNNOZSRC"  "UNSO2SRC"  "UNCO2SRC"  "UNCH4SRC"  "UNN2OSRC"  "UNHGSRC"   "UNHTISRC"  "UNHOZSRC"  "BIONOX"    "BIONOXOZ"  "BIOSO2"   
+ [97] "BIOCO2"    "BIOCH4"    "BION2O"    "CHPCHTI"   "CHPCHTIOZ" "CHPNOX"    "CHPNOXOZ"  "CHPSO2"    "CHPCO2"    "CHPCH4"    "CHPN2O"    "PLHTRT"    "PLGENACL"  "PLGENAOL"  "PLGENAGS"  "PLGENANC" 
+[113] "PLGENAHY"  "PLGENABM"  "PLGENAWI"  "PLGENASO"  "PLGENAGT"  "PLGENAOF"  "PLGENAOP"  "PLGENATN"  "PLGENATR"  "PLGENATH"  "PLGENACY"  "PLGENACN"  "PLCLPR"    "PLOLPR"    "PLGSPR"    "PLNCPR"   
+[129] "PLHYPR"    "PLBMPR"    "PLWIPR"    "PLSOPR"    "PLGTPR"    "PLOFPR"    "PLOPPR"    "PLTNPR"    "PLTRPR"    "PLTHPR"    "PLCYPR"    "PLCNPR"   
+> (ct <- ifelse(grepl("^ORISPL", nms), "text", "guess"))
+  [1] "guess" "guess" "guess" "guess" "text"  "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess"
+ [25] "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess"
+ [49] "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess"
+ [73] "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess"
+ [97] "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess"
+[121] "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess"
+> 
+> plnt20  <- read_xlsx(here("egrid2020","egrid2020_data.xlsx"), sheet=4, skip=1, col_types = ct )
+> 
+> dictionary.plnt20  <- read_xlsx(here("egrid2020","egrid2020_data.xlsx"), sheet=4, n_max=1)
+> 
+> (dictionary.plnt20  <- data.frame(variable=colnames(plnt20),
++                                   description=colnames(dictionary.plnt20)))
+     variable                                                                  description
+1    SEQPLT20                                         eGRID2020 Plant file sequence number
+2        YEAR                                                                    Data Year
+3    PSTATABB                                                     Plant state abbreviation
+4       PNAME                                                                   Plant name
+5      ORISPL                                          DOE/EIA ORIS plant or facility code
+6     OPRNAME                         Plant transmission or distribution system owner name
+7     OPRCODE                           Plant transmission or distribution system owner ID
+8    UTLSRVNM                                                                 Utility name
+9    UTLSRVID                                                                   Utility ID
+10     SECTOR                                                           Plant-level sector
+11     BANAME                                                     Balancing Authority Name
+12     BACODE                                                     Balancing Authority Code
+13       NERC                                                          NERC region acronym
+14     SUBRGN                                                      eGRID subregion acronym
+15     SRNAME                                                         eGRID subregion name
+16     ISORTO                                           Plant associated ISO/RTO Territory
+17     FIPSST                                                        Plant FIPS state code
+18   FIPSCNTY                                                       Plant FIPS county code
+19   CNTYNAME                                                            Plant county name
+20        LAT                                                               Plant latitude
+21        LON                                                              Plant longitude
+22     NUMUNT                                                              Number of units
+23     NUMGEN                                                         Number of generators
+24    PLPRMFL                                                           Plant primary fuel
+25   PLFUELCT                                                  Plant primary fuel category
+26   COALFLAG          Flag indicating if the plant burned or generated any amount of coal
+27     CAPFAC                                                        Plant capacity factor
+28   NAMEPCAP                                                Plant nameplate capacity (MW)
+29   NBFACTOR                                                           Nonbaseload Factor
+30   RMBMFLAG                                        Biogas/ biomass plant adjustment flag
+31    CHPFLAG                          Combined heat and power (CHP) plant adjustment flag
+32   USETHRMO                                      CHP plant useful thermal output (MMBtu)
+33    PWRTOHT                                                CHP plant power to heat ratio
+34   ELCALLOC                                         CHP plant electric allocation factor
+35     PSFLAG                                                    Plant pumped storage flag
+36    PLHTIAN                              Plant annual heat input from combustion (MMBtu)
+37    PLHTIOZ                        Plant ozone season heat input from combustion (MMBtu)
+38   PLHTIANT                                        Plant total annual heat input (MMBtu)
+39   PLHTIOZT                                  Plant total ozone season heat input (MMBtu)
+40   PLNGENAN                                            Plant annual net generation (MWh)
+41   PLNGENOZ                                      Plant ozone season net generation (MWh)
+42    PLNOXAN                                            Plant annual NOx emissions (tons)
+43    PLNOXOZ                                      Plant ozone season NOx emissions (tons)
+44    PLSO2AN                                            Plant annual SO2 emissions (tons)
+45    PLCO2AN                                            Plant annual CO2 emissions (tons)
+46    PLCH4AN                                             Plant annual CH4 emissions (lbs)
+47    PLN2OAN                                             Plant annual N2O emissions (lbs)
+48   PLCO2EQA                                 Plant annual CO2 equivalent emissions (tons)
+49     PLHGAN                                              Plant annual Hg emissions (lbs)
+50   PLNOXRTA                         Plant annual NOx total output emission rate (lb/MWh)
+51   PLNOXRTO                   Plant ozone season NOx total output emission rate (lb/MWh)
+52   PLSO2RTA                         Plant annual SO2 total output emission rate (lb/MWh)
+53   PLCO2RTA                         Plant annual CO2 total output emission rate (lb/MWh)
+54   PLCH4RTA                         Plant annual CH4 total output emission rate (lb/MWh)
+55   PLN2ORTA                         Plant annual N2O total output emission rate (lb/MWh)
+56   PLC2ERTA              Plant annual CO2 equivalent total output emission rate (lb/MWh)
+57    PLHGRTA                          Plant annual Hg total output emission rate (lb/MWh)
+58    PLNOXRA                              Plant annual NOx input emission rate (lb/MMBtu)
+59    PLNOXRO                        Plant ozone season NOx input emission rate (lb/MMBtu)
+60    PLSO2RA                              Plant annual SO2 input emission rate (lb/MMBtu)
+61    PLCO2RA                              Plant annual CO2 input emission rate (lb/MMBtu)
+62    PLCH4RA                              Plant annual CH4 input emission rate (lb/MMBtu)
+63    PLN2ORA                              Plant annual N2O input emission rate (lb/MMBtu)
+64    PLC2ERA                   Plant annual CO2 equivalent input emission rate (lb/MMBtu)
+65     PLHGRA                               Plant annual Hg input emission rate (lb/MMBtu)
+66   PLNOXCRT                    Plant annual NOx combustion output emission rate (lb/MWh)
+67   PLNOXCRO              Plant ozone season NOx combustion output emission rate (lb/MWh)
+68   PLSO2CRT                    Plant annual SO2 combustion output emission rate (lb/MWh)
+69   PLCO2CRT                    Plant annual CO2 combustion output emission rate (lb/MWh)
+70   PLCH4CRT                    Plant annual CH4 combustion output emission rate (lb/MWh)
+71   PLN2OCRT                    Plant annual N2O combustion output emission rate (lb/MWh)
+72   PLC2ECRT         Plant annual CO2 equivalent combustion output emission rate (lb/MWh)
+73    PLHGCRT                     Plant annual Hg combustion output emission rate (lb/MWh)
+74      UNNOX                                 Plant unadjusted annual NOx emissions (tons)
+75    UNNOXOZ                           Plant unadjusted ozone season NOx emissions (tons)
+76      UNSO2                                 Plant unadjusted annual SO2 emissions (tons)
+77      UNCO2                                 Plant unadjusted annual CO2 emissions (tons)
+78      UNCH4                                  Plant unadjusted annual CH4 emissions (lbs)
+79      UNN2O                                  Plant unadjusted annual N2O emissions (lbs)
+80       UNHG                                   Plant unadjusted annual Hg emissions (lbs)
+81      UNHTI                   Plant unadjusted annual heat input from combustion (MMBtu)
+82    UNHTIOZ             Plant unadjusted ozone season heat input from combustion (MMBtu)
+83     UNHTIT                             Plant unadjusted total annual heat input (MMBtu)
+84   UNHTIOZT                       Plant unadjusted total ozone season heat input (MMBtu)
+85   UNNOXSRC                                 Plant unadjusted annual NOx emissions source
+86   UNNOZSRC                           Plant unadjusted ozone season NOx emissions source
+87   UNSO2SRC                                 Plant unadjusted annual SO2 emissions source
+88   UNCO2SRC                                 Plant unadjusted annual CO2 emissions source
+89   UNCH4SRC                                 Plant unadjusted annual CH4 emissions source
+90   UNN2OSRC                                 Plant unadjusted annual N2O emissions source
+91    UNHGSRC                                  Plant unadjusted annual Hg emissions source
+92   UNHTISRC                                    Plant unadjusted annual heat input source
+93   UNHOZSRC                              Plant unadjusted ozone season heat input source
+94     BIONOX                                    Plant annual NOx biomass emissions (tons)
+95   BIONOXOZ                              Plant ozone season NOx biomass emissions (tons)
+96     BIOSO2                                    Plant annual SO2 biomass emissions (tons)
+97     BIOCO2                                    Plant annual CO2 biomass emissions (tons)
+98     BIOCH4                                     Plant annual CH4 biomass emissions (lbs)
+99     BION2O                                     Plant annual N2O biomass emissions (lbs)
+100   CHPCHTI                     Plant combustion heat input CHP adjustment value (MMBtu)
+101 CHPCHTIOZ Plant combustion annual ozone season heat input CHP adjustment value (MMBtu)
+102    CHPNOX                       Plant annual NOx emissions CHP adjustment value (tons)
+103  CHPNOXOZ                 Plant ozone season NOx emissions CHP adjustment value (tons)
+104    CHPSO2                       Plant annual SO2 emissions CHP adjustment value (tons)
+105    CHPCO2                       Plant annual CO2 emissions CHP adjustment value (tons)
+106    CHPCH4                        Plant annual CH4 emissions CHP adjustment value (lbs)
+107    CHPN2O                        Plant annual N2O emissions CHP adjustment value (lbs)
+108    PLHTRT                                            Plant nominal heat rate (Btu/kWh)
+109  PLGENACL                                       Plant annual coal net generation (MWh)
+110  PLGENAOL                                        Plant annual oil net generation (MWh)
+111  PLGENAGS                                        Plant annual gas net generation (MWh)
+112  PLGENANC                                    Plant annual nuclear net generation (MWh)
+113  PLGENAHY                                      Plant annual hydro net generation (MWh)
+114  PLGENABM                                    Plant annual biomass net generation (MWh)
+115  PLGENAWI                                       Plant annual wind net generation (MWh)
+116  PLGENASO                                      Plant annual solar net generation (MWh)
+117  PLGENAGT                                 Plant annual geothermal net generation (MWh)
+118  PLGENAOF                               Plant annual other fossil net generation (MWh)
+119  PLGENAOP              Plant annual other unknown/ purchased fuel net generation (MWh)
+120  PLGENATN                        Plant annual total nonrenewables net generation (MWh)
+121  PLGENATR                           Plant annual total renewables net generation (MWh)
+122  PLGENATH                  Plant annual total nonhydro renewables net generation (MWh)
+123  PLGENACY                           Plant annual total combustion net generation (MWh)
+124  PLGENACN                        Plant annual total noncombustion net generation (MWh)
+125    PLCLPR                                 Plant coal generation percent (resource mix)
+126    PLOLPR                                  Plant oil generation percent (resource mix)
+127    PLGSPR                                  Plant gas generation percent (resource mix)
+128    PLNCPR                              Plant nuclear generation percent (resource mix)
+129    PLHYPR                                Plant hydro generation percent (resource mix)
+130    PLBMPR                              Plant biomass generation percent (resource mix)
+131    PLWIPR                                 Plant wind generation percent (resource mix)
+132    PLSOPR                                Plant solar generation percent (resource mix)
+133    PLGTPR                           Plant geothermal generation percent (resource mix)
+134    PLOFPR                         Plant other fossil generation percent (resource mix)
+135    PLOPPR       Plant other unknown / purchased fuel generation percent (resource mix)
+136    PLTNPR                  Plant total nonrenewables generation percent (resource mix)
+137    PLTRPR                     Plant total renewables generation percent (resource mix)
+138    PLTHPR            Plant total nonhydro renewables generation percent (resource mix)
+139    PLCYPR                     Plant total combustion generation percent (resource mix)
+140    PLCNPR                  Plant total noncombustion generation percent (resource mix)
+> 
+> plnt20 <- plnt20 %>%
++     mutate(FIPS = paste0(FIPSST, FIPSCNTY))
+> 
+> summary(plnt20$NAMEPCAP)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    0.0     2.6     9.0   130.7    75.0  6809.0       1 
+> summary(plnt20$PLNGENAN)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+ -845480     2502     9758   384580   105977 31552433     2211 
+> summary(plnt20$PLCO2EQA)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+       0      100     8876   484081   177632 18981902     9251 
+> summary(plnt20$PLSO2AN)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+    0.00     0.12     1.13   279.23     7.95 43582.90     9251 
+> 
+> ## (nms <- names(read_excel("egrid2020_data.xlsx", sheet=2, skip=1, n_max = 0)))
+> ## (ct <- ifelse(grepl("^ORISPL", nms), "text", "guess"))
+> ## unt20  <- read_xlsx("egrid2020_data.xlsx", sheet=2, skip=1, col_types = ct )
+> ## dictionary.unt20  <- read_xlsx("egrid2020_data.xlsx", sheet=2, n_max=1)
+> ## (dictionary.unt20  <- data.frame(variable=colnames(unt20),
+> ##                                         description=colnames(dictionary.unt20)))
+> 
+> (nms <- names(read_excel(here("egrid2020","eGRID2020 DRAFT PM Emissions.xlsx"), sheet="2020 PM Plant-level Data", skip=1, n_max = 0)))
+ [1] "YEAR"      "PSTATABB"  "PNAME"     "ORISPL"    "SUBRGN"    "SRNAME"    "PLPRMFL"   "NAMEPCAP"  "ELCALLOC"  "PLNGENAN"  "PLHTIAN"   "PLPM25AN"  "PLPM25RTA" "PLPM25RA"  "PM25SRC"   "UNHTIT"   
+[17] "UNPM25"   
+> (ct <- ifelse(grepl("^ORISPL", nms), "text", "guess"))
+ [1] "guess" "guess" "guess" "text"  "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess" "guess"
+> egrid_pm25_2020  <- read_xlsx(here("egrid2020", "eGRID2020 DRAFT PM Emissions.xlsx"), sheet="2020 PM Plant-level Data", skip=1, col_types = ct )
+> egrid_pm25_2020  <- egrid_pm25_2020 %>% transmute(ORISPL, PLPM25AN_tons = ifelse(is.na(PLPM25AN), 0, PLPM25AN))
+> plnt20 <- left_join(plnt20, egrid_pm25_2020, by=c("ORISPL"="ORISPL"))
+> 
+> 
+> plnt20 <- left_join(plnt20, apeep, by=c("FIPS" = "FIPS")) %>%
++     mutate(
++         PM2.5_apeep = (PLPM25AN_tons * PM25_M_2014),
++         SOX_apeep   = (PLSO2AN * SO2_M_2014),
++         NOx_apeep   = (PLNOXAN * NOx_M_2014),
++         apeep = PM2.5_apeep + SOX_apeep + NOx_apeep
++     )
+> 
+> 
+> 
+> 
+> plnt20 %>%
++     filter(PLNGENAN>0) %>%
++     group_by(PLFUELCT) %>%
++     summarize(
++         NAMEPCAP = sum(NAMEPCAP, na.rm=TRUE),
++         PLNGENAN = sum(PLNGENAN, na.rm=TRUE),
++         PLSO2AN = sum(PLSO2AN, na.rm=TRUE),
++         PLNOXAN = sum(PLNOXAN, na.rm=TRUE),
++         PLPM25AN = sum(PLPM25AN_tons, na.rm=TRUE),
++         PLCO2EQA = sum(PLCO2EQA, na.rm=TRUE),
++         apeep = sum(apeep, na.rm=TRUE)) %>%
++     transmute(PLFUELCT,
++               NAMEPCAP / sum(NAMEPCAP),
++               PLNGENAN / sum(PLNGENAN),
++               PLSO2AN / sum(PLSO2AN),
++               PLNOXAN / sum(PLNOXAN),
++               PLPM25AN / sum(PLPM25AN),
++               PLCO2EQA / sum(PLCO2EQA),
++               apeep / sum(apeep)
++               )
+# A tibble: 12 × 8
+   PLFUELCT   `NAMEPCAP/sum(NAMEPCAP)` `PLNGENAN/sum(PLNGENAN)` `PLSO2AN/sum(PLSO2AN)` `PLNOXAN/sum(PLNOXAN)` `PLPM25AN/sum(PLPM25AN)` `PLCO2EQA/sum(PLCO2EQA)` `apeep/sum(apeep)`
+   <chr>                         <dbl>                    <dbl>                  <dbl>                  <dbl>                    <dbl>                    <dbl>              <dbl>
+ 1 BIOMASS                    0.0120                   0.0159              0.0472                  0.0694                   0.0667                  0.0110              0.0551    
+ 2 COAL                       0.213                    0.204               0.844                   0.564                    0.498                   0.542               0.782     
+ 3 GAS                        0.462                    0.388               0.0153                  0.298                    0.375                   0.424               0.139     
+ 4 GEOTHERMAL                 0.00305                  0.00395             0.00240                 0.00000831               0                       0.000675            0.000841  
+ 5 HYDRO                      0.0642                   0.0708              0.00000757              0.0000790                0.0000597               0.00000336          0.0000115 
+ 6 NUCLEAR                    0.0823                   0.198               0.0000159               0.000163                 0.00143                 0.00157             0.00000307
+ 7 OFSL                       0.00127                  0.00225             0.0000389               0.000504                 0.000669                0.00208             0.000299  
+ 8 OIL                        0.0292                   0.00755             0.0896                  0.0635                   0.0509                  0.0163              0.0178    
+ 9 OTHF                       0.00360                  0.00348             0.00155                 0.00397                  0.00720                 0.00174             0.00407   
+10 SOLAR                      0.0376                   0.0221              0.0000167               0.000234                 0.000239                0.0000574           0.0000500 
+11 WIND                       0.0916                   0.0838              0.000000392             0.00000499               0.00000285              0.000000144         0.00000176
+12 <NA>                       0.000106                 0.000150            0                       0                        0                       0                   0         
+> 
+> 
+> ## Look for university generation
+> ## Per Reuters inquiry, Michael Pell and Tim McLaughlin
+> 
+> plnt20 %>%
++     filter(grepl("univ|college|institute|polytech",PNAME,ignore.case=TRUE) |
++            grepl("univ|college|institute|polytech",UTLSRVNM,ignore.case=TRUE)) %>%
++     select(PNAME,UTLSRVNM,OPRNAME,SECTOR,PSTATABB,PLFUELCT,NAMEPCAP,PLCO2EQA,PLCLPR,PLOLPR,PLGSPR)
+# A tibble: 193 × 11
+    PNAME                                      UTLSRVNM                                 OPRNAME                                 SECTOR             PSTATABB PLFUELCT NAMEPCAP  PLCO2EQA  PLCLPR
+    <chr>                                      <chr>                                    <chr>                                   <chr>              <chr>    <chr>       <dbl>     <dbl>   <dbl>
+  1 University of Alaska Fairbanks             University of Alaska                     Golden Valley Elec Assn Inc             Commercial CHP     AK       COAL         39.6  27861.    0.958 
+  2 UA Central Utility Plant                   University Of Arkansas                   Southwestern Electric Power Co          Commercial CHP     AR       GAS           5.6  27845.    0     
+  3 Arizona State University CHP               Energy Center Phoenix LLC                Arizona Public Service Co               Commercial CHP     AZ       GAS          17.1  12352.    0     
+  4 Arizona Western College PV                 AES Distributed Energy                   Arizona Public Service Co               IPP Non-CHP        AZ       SOLAR         5.7     NA     0     
+  5 AZ State University - Tempe Campus Solar   Arizona State University FDM             Arizona Public Service Co               Commercial Non-CHP AZ       SOLAR         2.4     NA     0     
+  6 Cogeneration 1                             University of Arizona                    Tucson Electric Power Co                Commercial CHP     AZ       GAS           9    17077.    0     
+  7 Cogeneration 2                             University of Arizona                    Tucson Electric Power Co                Commercial CHP     AZ       GAS           6    12124.    0     
+  8 Pima Community College                     Tesla Inc.                               Tucson Electric Power Co                IPP Non-CHP        AZ       SOLAR         1.1     NA     0     
+  9 Pima Community College - East Campus       Tesla Inc.                               Tucson Electric Power Co                IPP Non-CHP        AZ       SOLAR         1.3     NA     0     
+ 10 Pima Community College NW                  Onyx Asset Services Group                Tucson Electric Power Co                IPP Non-CHP        AZ       SOLAR         1.3     NA     0     
+ 11 University of Arizona - Biosphere 2        University of Arizona - Biosphere 2      USBIA-San Carlos Project                Commercial Non-CHP AZ       GAS           3.1     79.3   0     
+ 12 Bakersfield College Solar 01               Kern Community College District          Pacific Gas & Electric Co               Commercial Non-CHP CA       SOLAR         1.1     NA    NA     
+ 13 Biola University Hybrid                    Biola University                         Southern California Edison Co           Commercial CHP     CA       GAS           5.5   2958.    0     
+ 14 Butte College Main Campus Solar            Butte-Glenn Community College District   Pacific Gas & Electric Co               Commercial Non-CHP CA       SOLAR         3.5     NA     0     
+ 15 CA Institute for Women                     Ecoplexus, Inc                           Southern California Edison Co           IPP Non-CHP        CA       SOLAR         1       NA     0     
+ 16 Cal State Univ San Bernardino FC01         Southern California Edison Co            Southern California Edison Co           Electric Utility   CA       GAS           1.4     NA     0     
+ 17 California Institute of Technology         California Institute-Technology          City of Pasadena - (CA)                 Commercial CHP     CA       GAS          34.8  21107.    0     
+ 18 California State Univ at Channel Islands   SkyHigh 2 Solar                          Pacific Gas & Electric Co.              Industrial Non-CHP CA       SOLAR         4.3     NA    NA     
+ 19 Chaffey College Rancho Cucamonga Campus    Chaffey Community College District       Southern California Edison Co           Commercial Non-CHP CA       SOLAR         4       NA     0     
+ 20 Crafton Hills College Solar Farm           San Bernardino Comm College Dist         Southern California Edison Co           Commercial Non-CHP CA       SOLAR         1.3     NA     0     
+ 21 CSU Northridge Plant                       California State University, Northridge  Los Angeles Department of Water & Power Commercial Non-CHP CA       SOLAR         2.8     NA     0     
+ 22 CSU San Jose State University              SkyHigh 2 Solar                          Pacific Gas & Electric Co.              Industrial Non-CHP CA       SOLAR         1.7     NA    NA     
+ 23 CSUF State College                         Goldman Sachs Renewable Power Group      Southern California Edison Co           IPP Non-CHP        CA       SOLAR         1       NA     0     
+ 24 CSUF Trigeneration                         California State University at Fullerton Southern California Edison Co           Commercial CHP     CA       GAS           8.9   9267.    0     
+ 25 Energy Center                              University of Redlands                   Southern California Edison Co           Commercial CHP     CA       GAS           2.4   4495.    0     
+ 26 Gavilan Community College Solar Project    Gavilan District College Solar Project   Pacific Gas & Electric Co.              IPP Non-CHP        CA       <NA>          1.9     NA    NA     
+ 27 Loma Linda University Cogen                Loma Linda University                    Southern California Edison Co           Commercial CHP     CA       GAS          14.3  21422.    0     
+ 28 Los Angeles Harbor College                 Los Angeles Community College District   Los Angeles Department of Water & Power Commercial Non-CHP CA       SOLAR         1.2     NA     0     
+ 29 Mission College Blvd. Fuel Cell            2016 ESA Project Company, LLC            Pacific Gas & Electric Co.              IPP Non-CHP        CA       GAS           5       NA     0     
+ 30 Occidental College Solar Project           Occidental College                       Los Angeles Department of Water & Power Commercial Non-CHP CA       SOLAR         1       NA     0     
+ 31 Pacific Union College BESS                 ENGIE Storage Services NA LLC            Pacific Gas &amp; Electric Co           Commercial Non-CHP CA       OTHF          1       NA    NA     
+ 32 Palo Verde College                         SSA Solar of CA 2 LLC                    Southern California Edison Co           Commercial Non-CHP CA       SOLAR         1.2     NA     0     
+ 33 Parnassus Central Utility Plant            University of California-San Francisco   Pacific Gas & Electric Co               Commercial CHP     CA       GAS          13.4  23355.    0     
+ 34 Pierce College                             Los Angeles Community College District   Los Angeles Department of Water & Power Commercial Non-CHP CA       SOLAR         1.9     NA     0     
+ 35 Reedley Community College Solar            Forefront Power, LLC                     Pacific Gas & Electric Co.              IPP Non-CHP        CA       SOLAR         2.6     NA     0     
+ 36 San Diego State University                 San Diego State University               San Diego Gas & Electric Co             Commercial CHP     CA       GAS          17.6  16573.    0     
+ 37 San Jose Cogeneration                      San Jose State University Fclts Dev &Ops Pacific Gas & Electric Co               Commercial CHP     CA       GAS           6    13508.    0     
+ 38 Santa Rosa Junior College Petaluma Solar   Sonoma County Junior College District    Pacific Gas & Electric Co.              IPP Non-CHP        CA       SOLAR         1.2     NA     0     
+ 39 SCCCD - Clovis Community College           Forefront Power, LLC                     Pacific Gas & Electric Co.              IPP Non-CHP        CA       SOLAR         1.3     NA     0     
+ 40 SCCCD - Fresno Community College           Forefront Power, LLC                     Pacific Gas & Electric Co.              IPP Non-CHP        CA       SOLAR         2.2     NA     0     
+ 41 SF State University                        Pacific Gas & Electric Co.               Pacific Gas & Electric Co               Electric Utility   CA       GAS           1.6     NA     0     
+ 42 UCI Facilities Management Central Plant    University of California Irvine          Southern California Edison Co           Commercial CHP     CA       GAS          19    30729.    0     
+ 43 UCLA So Campus Cogen Project               University of California-LA              Los Angeles Department of Water & Power Commercial CHP     CA       GAS          43    81366.    0     
+ 44 Univ of Calif Santa Cruz Cogeneration      Santa Cruz Cogeneration Assoc            Pacific Gas & Electric Co               Commercial CHP     CA       GAS           7.2  11153.    0     
+ 45 Univ of California San Diego Solar         University of California San Diego       San Diego Gas & Electric Co             Commercial Non-CHP CA       SOLAR         1.2     NA     0     
+ 46 Univ of San Francisco Cogen                University of San Francisco              Pacific Gas & Electric Co               Commercial CHP     CA       GAS           1.5   3019.    0     
+ 47 University of California San Diego Hybrid  University of California San Diego       San Diego Gas & Electric Co             Commercial CHP     CA       GAS          35.5  71728.    0     
+ 48 Victor Valley CC CPV Solar                 Victor Valley Community College District Southern California Edison Co           Commercial Non-CHP CA       SOLAR         1       NA     0     
+ 49 University of Colorado                     University of Colorado                   Public Service Co of Colorado           Commercial CHP     CO       GAS          33     2086.    0     
+ 50 CCSU Co-Gen-STBY Gen                       Central Connecticut State University     Connecticut Light & Power Co            Commercial CHP     CT       GAS           3.6   1706.    0     
+ 51 Fairfield University CHP Plant             Fairfield University                     United Illuminating Co                  Commercial CHP     CT       GAS           4.5   9034.    0     
+ 52 Manchester Community College East          Onyx Asset Services Group                NSTAR Electric Company                  IPP Non-CHP        CT       SOLAR         1       NA     0     
+ 53 Manchester Community College North         Onyx Asset Services Group                NSTAR Electric Company                  IPP Non-CHP        CT       SOLAR         1       NA     0     
+ 54 Trinity College Fuel Cell                  AEP Onsite Partners, LLC                 Eversource                              IPP Non-CHP        CT       GAS           1.4     NA     0     
+ 55 UCONN Cogen Facility                       University of Connecticut                Connecticut Light & Power Co            Commercial CHP     CT       GAS          25.7  40529.    0     
+ 56 Wesleyan University Cogen 1                Wesleyan University                      Connecticut Light & Power Co            Commercial CHP     CT       GAS           2.4   5956.    0     
+ 57 Ross Hall Central Utility Plant            The George Washington University         Potomac Electric Power Co               Commercial CHP     DC       GAS           4.6     NA    NA     
+ 58 University of Delaware Wind Turbine        First State Marine Wind                  City of Lewes - (DE)                    Commercial Non-CHP DE       WIND          2       NA     0     
+ 59 Standby Generation Plant                   Pensacola Christian College              Gulf Power Co                           Commercial Non-CHP FL       GAS          13.7     90.5   0     
+ 60 University of Florida                      Duke Energy Florida, LLC                 Duke Energy Florida, Inc                Electric Utility   FL       GAS          54.2 160292.    0     
+ 61 Fort Valley State University Solar         Georgia Power Co                         Georgia Power Co                        Electric Utility   GA       SOLAR        10.7     NA    NA     
+ 62 Georgia College & State University Solar   Georgia Power Co                         Georgia Power Co                        Electric Utility   GA       SOLAR         3.5     NA    NA     
+ 63 Iowa Lakes Community College Wind Farm     Iowa Lakes Community College             City of Estherville - (IA)              Commercial Non-CHP IA       WIND          1       NA     0     
+ 64 Iowa State University                      Iowa State University                    City of Ames - (IA)                     Commercial CHP     IA       GAS          49    42030.    0.445 
+ 65 Kirkwood Wind Turbine                      Kirkwood Community College               Interstate Power and Light Co           IPP Non-CHP        IA       WIND          2.5     NA     0     
+ 66 Luther College Wind Project                Luther College Wind Energy Project LLC   Interstate Power and Light Co           IPP Non-CHP        IA       WIND          1.6     NA     0     
+ 67 Oakdale Renewable Energy Plant             University of Iowa                       Interstate Power and Light Co           Commercial Non-CHP IA       GAS           2.8   1267.    0     
+ 68 University of Iowa Main Power Plant        University of Iowa                       MidAmerican Energy Co                   Commercial CHP     IA       COAL         46.5  10956.    0.200 
+ 69 University of Northern Iowa                University of Northern Iowa              Cedar Falls Utilities                   Commercial CHP     IA       GAS           7.5   6083.    0.0441
+ 70 BYUI Central Energy Facility               Brigham Young Univ Idaho                 PacifiCorp                              Commercial CHP     ID       GAS           5.6  12034.    0     
+ 71 Heartland Community College                Heartland Community College              Ameren Illinois Company                 Commercial Non-CHP IL       WIND          1.7     NA     0     
+ 72 ITT Cogen Facility                         Illinois Institute-Technology            Commonwealth Edison Co                  Commercial CHP     IL       GAS           7.4     13.9   0     
+ 73 John A Logan College Solar                 REA Investments, LLC                     Ameren Illinois Company                 IPP Non-CHP        IL       SOLAR         1.9     NA     0     
+ 74 Loyola University Health Plant             Loyola University Health System          Commonwealth Edison Co                  Commercial CHP     IL       GAS          10.6    510.    0     
+ 75 LSP University Park, LLC                   LSP University Park LLC                  Commonwealth Edison Co                  IPP Non-CHP        IL       GAS         726   484467.    0     
+ 76 Northeastern Illinois University Cogen     Northeastern Illinois University         Commonwealth Edison Co                  Commercial CHP     IL       GAS           3.2      3.39  0     
+ 77 SIUC                                       Southern Illinois University Carbondale  Ameren Illinois Company                 Commercial CHP     IL       COAL          5.1   3993.    1     
+ 78 Triton East and West Cogen                 Triton College                           Commonwealth Edison Co                  Commercial CHP     IL       GAS           3.6     46.9   0     
+ 79 University of Illinois Abbott Power Plt    University of Illinois                   Ameren Illinois Company                 Commercial CHP     IL       GAS          83.3  66007.    0.0296
+ 80 University of Illinois Cogen Facility      University of Illinois                   Commonwealth Edison Co                  Commercial CHP     IL       GAS          59.9  33420.    0     
+ 81 University Park Energy                     University Park Energy LLC               Commonwealth Edison Co                  IPP Non-CHP        IL       GAS         353.  257737.    0     
+ 82 Notre Dame Hydro                           University of Notre Dame                 Indiana Michigan Power Co               Commercial Non-CHP IN       HYDRO         2.5     NA    NA     
+ 83 Purdue University-Wade Utility             Purdue University                        Duke Energy Indiana Inc                 Commercial CHP     IN       GAS          43.2  60126.    0.163 
+ 84 University of Notre Dame                   University of Notre Dame                 Indiana Michigan Power Co               Commercial CHP     IN       GAS          39.6  26473.    0     
+ 85 Fort Hays State University Wind Farm       Fort Hays State University               Midwest Energy Inc                      Commercial Non-CHP KS       WIND          4       NA     0     
+ 86 Louisiana Tech University Power Plant      Louisiana Tech University                Entergy Louisiana LLC                   Commercial CHP     LA       GAS          15    13258.    0     
+ 87 LSU Cogen                                  LSU and A&M College                      Entergy Gulf States - LA LLC            Commercial CHP     LA       GAS          19.6  43932.    0     
+ 88 Amherst College Co Gen                     Amherst College                          4-County Electric Power Assn            Commercial CHP     MA       GAS           1.7   2004.    0     
+ 89 Clark University                           Clark University                         New England Power Company               Commercial CHP     MA       GAS           4     3243.    0     
+ 90 Framingham State University Plant          Framingham State University              NSTAR Electric Company                  Commercial Non-CHP MA       SOLAR         3.5     18.0   0     
+ 91 Hampshire College Hybrid                   Tesla Inc.                               Western Massachusetts Electric Company  IPP Non-CHP        MA       SOLAR         4.4     NA     0     
+ 92 Mt Wachusett Community College             Mt Wachusett Community College           Massachusetts Electric Co               Commercial Non-CHP MA       WIND          3.4     NA     0     
+ 93 Smith College Central Heating Plant        The Trustees of Smith College            Massachusetts Electric Co               Commercial CHP     MA       GAS           5.3   3078.    0     
+ 94 Univ of Massachusetts Medical Center       University of Massachusetts Medical      Massachusetts Electric Co               Commercial CHP     MA       GAS          17.5  21093.    0     
+ 95 Wellesley College Central Utility Plant    Wellesley College                        Town of Wellesley - (MA)                Commercial CHP     MA       GAS          10.1     NA    NA     
+ 96 Williams College - Campus CHP              President & Trustees of Williams College Massachusetts Electric Co               Commercial CHP     MA       GAS          10.2    779.    0     
+ 97 Chesapeake College                         Tesla Inc.                               Delmarva Power                          IPP Non-CHP        MD       SOLAR         1.5     NA     0     
+ 98 Eastern Correctional Institute             Maryland Environmental Service           Delmarva Power                          Commercial CHP     MD       BIOMASS       5.8    193.    0     
+ 99 IKEA College Park 411                      IKEA Property Inc                        Potomac Electric Power Co               Commercial Non-CHP MD       SOLAR         2       NA     0     
+100 NIH Cogeneration Facility                  National Institutes of Health            Potomac Electric Power Co               Commercial Non-CHP MD       GAS          50   111154.    0     
+101 UMCP CHP Plant                             Trigen-Cinergy Solutions College Park    Potomac Electric Power Co               IPP CHP            MD       GAS          27.4  23436.    0     
+102 Wor-Wic Community College - Offsite        Tesla Inc.                               Delmarva Power                          IPP Non-CHP        MD       SOLAR         2       NA     0     
+103 Central Michigan University                Central Michigan University              Consumers Energy Co                     Commercial CHP     MI       GAS           4.8   7408.    0     
+104 East. Michigan Univ. Heating Plant         East. Michigan Univ. Heating Plant       DTE Electric Company                    Commercial CHP     MI       GAS          11.3   8548.    0     
+105 T B Simon Power Plant                      Michigan State University                Consumers Energy Co                     Commercial CHP     MI       GAS         126.   91238.    0     
+106 University of Michigan                     University of Michigan                   Detroit Edison Co                       Commercial CHP     MI       GAS          48.5  44011.    0     
+107 Warner Lambert                             University of Michigan NCampus Research  DTE Electric Company                    Commercial CHP     MI       GAS          12.4   7363.    0     
+108 Western Michigan University Power Plant    Western Michigan University              Consumers Energy Co                     Commercial CHP     MI       GAS          16.7  18263.    0     
+109 Carleton College                           Carleton College                         Northern States Power Co - Minnesota    Commercial Non-CHP MN       WIND          7.8     22.8   0     
+110 Eolos Wind Energy Research Field Station   Regents of the University of Minnesota   Northern States Power Co - Minnesota    IPP Non-CHP        MN       WIND          2.5     NA     0     
+111 St. Olaf StandBy Generators                St. Olaf College                         Northern States Power Co - Minnesota    IPP Non-CHP        MN       OIL           4.1     40.2   0     
+112 St. Olaf Wind Turbine                      St. Olaf College                         Northern States Power Co - Minnesota    IPP Non-CHP        MN       WIND          1.6     NA     0     
+113 UMM Wind Turbine                           University of Minnesota Morris Campus    Otter Tail Power Co                     Commercial Non-CHP MN       WIND          1.7     NA     0     
+114 Univ Minnesota CHP Plant                   Veolia Energy                            Northern States Power Co - Minnesota    IPP CHP            MN       GAS          21    99623.    0     
+115 WCROC Wind Farm                            University of Minnesota WCROC            Otter Tail Power Co                     IPP Non-CHP        MN       WIND          1.7     NA     0     
+116 MU Combined Heat and Power Plant           Curators of the University of Missouri   City of Columbia - (MO)                 Commercial CHP     MO       BIOMASS      91.4  40485.    0.0256
+117 NCSU Cates Cogeneration Plant              NC State University, Energy Systems      Duke Energy Carolinas, LLC              Commercial CHP     NC       GAS          11.2  26634.    0     
+118 NCSU CCUP Cogeneration Plant               NC State University, Energy Systems      Duke Energy Carolinas, LLC              Commercial CHP     NC       GAS           6.6  23473.    0     
+119 SAS Solar Farm                             SAS Institute Inc                        Duke Energy Progress - (NC)             IPP Non-CHP        NC       SOLAR         2       NA     0     
+120 UNC-CH LFG Facility                        University of North Carolina             Duke Energy Carolinas, LLC              Commercial Non-CHP NC       BIOMASS       1       NA    NA     
+121 University of NC Chapel Hill               University of North Carolina             Duke Energy Carolinas, LLC              Commercial CHP     NC       COAL         56    37265.    0.514 
+122 Dartmouth College Heating Plant            Dartmouth College                        Public Service Co of NH                 Commercial CHP     NH       OIL           7     4853.    0     
+123 Plymouth State College Cogeneration        Plymouth State University                New Hampshire Elec Coop Inc             Commercial CHP     NH       OIL           2.8     NA    NA     
+124 College of New Jersey                      The College of New Jersey                Public Service Elec & Gas Co            Commercial CHP     NJ       GAS           6.2   5970.    0     
+125 County College of Morris                   Sunlight General Morris Solar LLC        Jersey Central Power & Lt Co            Commercial Non-CHP NJ       SOLAR         2.9     NA     0     
+126 Gloucester Community College Solar         Goldman Sachs Renewable Power Group      Atlantic City Electric Co               IPP Non-CHP        NJ       SOLAR         2.3     NA     0     
+127 Livingston Solar Canopies                  Rutgers, The State University of NJ      Public Service Elec & Gas Co            Commercial Non-CHP NJ       SOLAR         6.6     NA     0     
+128 Livingston Solar Farm                      Rutgers, The State University of NJ      Public Service Elec & Gas Co            Commercial Non-CHP NJ       SOLAR         1.2     NA     0     
+129 Mercer County Community College            Sunlight General Mercer Solar LLC        Public Service Elec & Gas Co            Commercial Non-CHP NJ       SOLAR         7.5     NA     0     
+130 Montclair State University Cogen           UMM Energy Partners LLC.                 Public Service Elec & Gas Co            Commercial CHP     NJ       GAS          11.8   1402.    0     
+131 Princeton University Cogeneration          Trustees of Princeton University         Princeton Public Utils Comm             Commercial CHP     NJ       GAS          32    10837.    0     
+132 Rutgers Biomedical and Health Cogen        Rutgers, The State University of NJ      Public Service Elec & Gas Co            Commercial CHP     NJ       GAS          10.5   2861.    0     
+133 William Paterson University                Nautilus Solar WPU LLC                   Public Service Elec & Gas Co            Commercial Non-CHP NJ       SOLAR         1.4     NA    NA     
+134 Ford Utilities Center                      University of New Mexico                 Public Service Co of NM                 Commercial CHP     NM       GAS          16.3  25925.    0     
+135 Mesalands Comm College Wind Turbine        Mesalands Community College              Southwestern Public Service Co          Commercial Non-CHP NM       WIND          1.5     NA     0     
+136 New Mexico State University                New Mexico State University              El Paso Electric Co                     Commercial CHP     NM       GAS           4.7  11970.    0     
+137 Univ New Mexico Cogen Plant                University of New Mexico                 Public Service Co of NM                 Commercial CHP     NM       GAS           2.5     NA    NA     
+138 Albert Einstein College of Medicine        Albert Einstein College of Medicine      Consolidated Edison Co-NY Inc           Commercial Non-CHP NY       OIL           8.6     22.5   0     
+139 Columbia University - Johnson Farms        AES Distributed Energy                   New York State Elec & Gas Corp          IPP Non-CHP        NY       SOLAR         2       NA     0     
+140 Columbia University - Minisink             AES Distributed Energy                   New York State Elec & Gas Corp          IPP Non-CHP        NY       SOLAR         2       NA     0     
+141 Cornell University Ithaca Campus           Cornell University                       New York State Elec & Gas Corp          Commercial CHP     NY       GAS          39.5  47827.    0     
+142 Fordham University                         Fordham University                       Consolidated Edison Co-NY Inc           Commercial Non-CHP NY       OIL           1.5     NA    NA     
+143 Hamilton College                           Tesla Inc.                               Niagara Mohawk Power Corp.              IPP Non-CHP        NY       SOLAR         2       NA    NA     
+144 Hobart & William Smith College Gates Rd.   Dynamic Energy Solutions, LLC            New York State Elec & Gas Corp          Commercial Non-CHP NY       SOLAR         1.9     NA     0     
+145 HVCC Cogen Plant                           Hudson Valley Community College          Niagara Mohawk Power Corp.              Commercial CHP     NY       OIL           8.1   8405.    0     
+146 Kenmare - Sullivan Community College       Goldman Sachs Renewable Power Group      New York State Elec & Gas Corp          IPP Non-CHP        NY       SOLAR         2       NA     0     
+147 Monroe Community College Plant             Monroe County (NY)                       Rochester Gas & Electric Corp           Commercial CHP     NY       GAS           5.6     NA    NA     
+148 New York University Central Plant          New York University                      Consolidated Edison Co-NY Inc           Commercial CHP     NY       GAS          24.1  41127.    0     
+149 Richmond University Medical Center         Richmond University Medical Center       Consolidated Edison Co-NY Inc           Commercial Non-CHP NY       OIL           1.6     NA    NA     
+150 Skidmore College                           Terraform Arcadia                        New York State Elec & Gas Corp          IPP Non-CHP        NY       SOLAR         2       NA     0     
+151 St. Lawrence University - Sutton           AES Distributed Energy                   Niagara Mohawk Power Corp.              IPP Non-CHP        NY       SOLAR         2       NA     0     
+152 SUNY Old Westbury College                  SUNY Old Westbury College                Public Service Elec & Gas Co            Commercial Non-CHP NY       GAS           1.8     NA    NA     
+153 Tompkins Cortland Community College        SEC LHNY Solar One, LLC                  Massachusetts Electric Co               IPP Non-CHP        NY       SOLAR         2       NA     0     
+154 University of Rochester                    University of Rochester                  Rochester Gas & Electric Corp           Commercial CHP     NY       GAS          25.4  14669.    0     
+155 Central Utility Plant Cincinnati           University of Cincinnati                 Duke Energy Ohio Inc                    Commercial CHP     OH       GAS          47.2  63255.    0     
+156 East Campus Utility Plant                  University of Cincinnati                 Duke Energy Ohio Inc                    Commercial Non-CHP OH       OIL           7.3     46.3   0     
+157 Euclid Farm, Stamco N-54                   Case Western Reserve University          Cleveland Electric Illum Co             IPP Non-CHP        OH       WIND          1       NA     0     
+158 Oberlin Spear Point Solar One              Oberlin College                          City of Oberlin - (OH)                  Commercial Non-CHP OH       SOLAR         2       NA    NA     
+159 Ohio Northern University Solar Site        AEP Onsite Partners, LLC                 Ohio Power Co                           IPP Non-CHP        OH       SOLAR         3       NA     0     
+160 Summit Street Power Plant                  Kent State University                    Ohio Edison Co                          Commercial CHP     OH       GAS          13.2   3280.    0     
+161 University of Oklahoma                     University of Oklahoma                   Oklahoma Gas & Electric Co              Commercial CHP     OK       GAS          18.6     21.0   0     
+162 Oregon State University Energy Center      Oregon State University                  PacifiCorp                              Commercial CHP     OR       GAS           6.5   9972.    0     
+163 Oregon University System OIT Klamath Falls Tesla Inc.                               PacifiCorp                              IPP Non-CHP        OR       SOLAR         2       NA     0     
+164 Oregon University System Rabbit Field      Tesla Inc.                               PacifiCorp                              IPP Non-CHP        OR       SOLAR         1.2     NA     0     
+165 Univ of Oregon Central Power Station       University of Oregon                     City of Eugene - (OR)                   Commercial CHP     OR       GAS          11       41.2   0     
+166 Bucknell University                        Bucknell University                      Citizens Electric Co - (PA)             Commercial CHP     PA       GAS           5.9   9785.    0     
+167 East Campus Steam Plant                    Penn State University                    West Penn Power Company                 Commercial CHP     PA       GAS           7    15441.    0     
+168 Indiana University of Pennsylvania         Indiana University of Penn               Pennsylvania Electric Co                Commercial CHP     PA       GAS          24.4   4070.    0     
+169 Susquehanna University Solar               Terraform Arcadia                        PPL Electric Utilities Corp             IPP Non-CHP        PA       SOLAR         3       NA     0     
+170 Temple SEGF                                Temple University                        PECO Energy Co                          Commercial Non-CHP PA       GAS          16      627.    0     
+171 University Park Solar                      SS PA II PSU LLC                         West Penn Power Co                      IPP Non-CHP        PA       SOLAR         1.5     NA     0     
+172 West Campus Steam Plant                    Penn State University                    West Penn Power Company                 Commercial CHP     PA       GAS          20     3423.    0     
+173 Dry Bridge Solar (Brown University)        Goldman Sachs Renewable Power Group      Aggregated Transit Energy               IPP Non-CHP        RI       SOLAR        40       NA    NA     
+174 University Solar, LLC                      AES Distributed Energy                   The Narragansett Electric Co            IPP Non-CHP        RI       SOLAR        24       NA     0     
+175 Central Energy Facility                    Clemson University - Main Campus         Duke Energy Carolinas, LLC              Commercial Non-CHP SC       GAS          10        6.96  0     
+176 Central Plant                              Bob Jones University                     Duke Energy Carolinas, LLC              Commercial Non-CHP SC       OIL           7.4      2.38  0     
+177 Duke Energy CHP at Clemson University      Duke Energy Carolinas, LLC               Duke Energy Carolinas, LLC              Electric Utility   SC       GAS          13.4   3685.    0     
+178 MTSU Power Co-Gen Plant                    Middle Tennessee State University        City of Murfreesboro                    Commercial CHP     TN       GAS          15    14076.    0     
+179 University of Tennessee Steam Plant        University of Tennessee                  Knoxville Utilities Board               Commercial CHP     TN       GAS           5    11268.    0     
+180 Vanderbilt University Power Plant          Vanderbilt University                    Nashville Electric Service              Commercial CHP     TN       GAS          34.9  32583.    0     
+181 Hal C Weaver Power Plant                   University of Texas at Austin            Austin Energy                           Commercial CHP     TX       GAS         170.   88280.    0     
+182 Rice University                            Rice University                          CenterPoint Energy                      Commercial CHP     TX       GAS           6.9   2799.    0     
+183 UL Advanced Wind Turbine Test Facility     West Texas A&M University                Southwestern Public Service Co          Commercial Non-CHP TX       WIND          3.5     NA     0     
+184 BYU Central Heating Plant                  Brigham Young University (BYU)           PacifiCorp                              IPP CHP            UT       GAS          16.5  30452.    0     
+185 Central Energy Plant USU                   Utah State University                    City of Logan - (UT)                    Commercial Non-CHP UT       GAS           5    27171.    0     
+186 HTW Plant 303 COGEN                        The University of Utah                   PacifiCorp                              Commercial CHP     UT       GAS           7.4   8708.    0     
+187 Weber State University - Davis Campus PV   Tesla Inc.                               PacifiCorp                              IPP Non-CHP        UT       SOLAR         1.3     NA     0     
+188 Virginia Tech Power Plant                  Virginia Polytechnic Inst and State Unv  Virginia Tech Electric Service          Commercial CHP     VA       GAS           6.3   2510.    0.167 
+189 Middlebury College                         Middlebury College Biomass               Green Mountain Power Corp               Commercial CHP     VT       BIOMASS       1.6    717.    0     
+190 Biotech LS 0836                            Washington State University              Avista Corp                             Commercial Non-CHP WA       OIL           1       NA    NA     
+191 Grimes Way                                 Washington State University              Avista Corp                             Commercial Non-CHP WA       OIL           4      345.    0     
+192 University of Washington Power Plant       University of Washington                 City of Seattle - (WA)                  Commercial CHP     WA       GAS          15     3523.    0     
+193 Washington State University                Washington State University              Avista Corp                             Commercial CHP     WA       COAL          2       NA    NA     
+        PLOLPR    PLGSPR
+         <dbl>     <dbl>
+  1  0.0419     0.000133
+  2  0          1       
+  3  0          1       
+  4  0          0       
+  5  0          0       
+  6  0          1       
+  7  0          1       
+  8  0          0       
+  9  0          0       
+ 10  0          0       
+ 11  0.268      0.732   
+ 12 NA         NA       
+ 13  0          1       
+ 14  0          0       
+ 15  0          0       
+ 16  0          1       
+ 17  0          1       
+ 18 NA         NA       
+ 19  0          0       
+ 20  0          0       
+ 21  0          0       
+ 22 NA         NA       
+ 23  0          0       
+ 24  0          0.816   
+ 25  0          1       
+ 26 NA         NA       
+ 27  0          1       
+ 28  0          0       
+ 29  0          1       
+ 30  0          0       
+ 31 NA         NA       
+ 32  0          0       
+ 33  0.000804   0.999   
+ 34  0          0       
+ 35  0          0       
+ 36  0          0.974   
+ 37  0          1       
+ 38  0          0       
+ 39  0          0       
+ 40  0          0       
+ 41  0          1       
+ 42  0          1       
+ 43  0          1       
+ 44  0          1       
+ 45  0          0       
+ 46  0          1       
+ 47  0          1       
+ 48  0          0       
+ 49  0          1       
+ 50  0          1       
+ 51  0          1       
+ 52  0          0       
+ 53  0          0       
+ 54  0          1       
+ 55  0.00325    0.997   
+ 56  0          1       
+ 57 NA         NA       
+ 58  0          0       
+ 59  0          1       
+ 60  0          1       
+ 61 NA         NA       
+ 62 NA         NA       
+ 63  0          0       
+ 64  0          0.555   
+ 65  0          0       
+ 66  0          0       
+ 67  0          1       
+ 68  0.0000466  0.444   
+ 69  0.139      0.817   
+ 70  0          1       
+ 71  0          0       
+ 72  0          1       
+ 73  0          0       
+ 74  0          1       
+ 75  0          1       
+ 76  0          1       
+ 77  0          0       
+ 78  0          1       
+ 79  0          0.970   
+ 80  0.00257    0.997   
+ 81  0          1       
+ 82 NA         NA       
+ 83  0.000254   0.837   
+ 84  0.00151    0.998   
+ 85  0          0       
+ 86  0          1       
+ 87  0          1       
+ 88  0          1       
+ 89  0          1       
+ 90  0.151      0       
+ 91  0          0       
+ 92  0          0       
+ 93  0          1       
+ 94  0.000941   0.999   
+ 95 NA         NA       
+ 96  0.0148     0.985   
+ 97  0          0       
+ 98  0.0123     0       
+ 99  0          0       
+100  0          1       
+101  0.00894    0.991   
+102  0          0       
+103  0          1.00    
+104  0          1       
+105  0          1       
+106  0.00948    0.991   
+107  0.00186    0.998   
+108  0          1       
+109  0.00311    0       
+110  0          0       
+111  1          0       
+112  0          0       
+113  0          0       
+114  0.00404    0.996   
+115  0          0       
+116  0.0000104  0.731   
+117  0.000591   0.999   
+118  0.0000469  1.00    
+119  0          0       
+120 NA         NA       
+121  0          0.486   
+122  1          0       
+123 NA         NA       
+124  0          1       
+125  0          0       
+126  0          0       
+127  0          0       
+128  0          0       
+129  0          0       
+130  0          1       
+131  0.0000510  0.812   
+132  0          1       
+133 NA         NA       
+134  0          1       
+135  0          0       
+136  0          1       
+137 NA         NA       
+138  1          0       
+139  0          0       
+140  0          0       
+141  0.00304    0.997   
+142 NA         NA       
+143 NA         NA       
+144  0          0       
+145  0.00124    0.999   
+146  0          0       
+147 NA         NA       
+148  0.0706     0.929   
+149 NA         NA       
+150  0          0       
+151  0          0       
+152 NA         NA       
+153  0          0       
+154  0.0000148  1.00    
+155  0.00149    0.999   
+156  1          0       
+157  0          0       
+158 NA         NA       
+159  0          0       
+160  0          1       
+161  0          1       
+162  0          1       
+163  0          0       
+164  0          0       
+165  0.00489    0.995   
+166  0.000258   1.00    
+167  0.000574   0.999   
+168  0.0857     0.914   
+169  0          0       
+170  0          1       
+171  0          0       
+172  0.0000581  1.00    
+173 NA         NA       
+174  0          0       
+175  0          1       
+176  1          0       
+177  0          1       
+178  0          1       
+179  0          1       
+180  0          1       
+181  0          1       
+182  0          1       
+183  0          0       
+184  0          1       
+185  0          1       
+186  0          1       
+187  0          0       
+188  0          0.833   
+189  0.00804    0.400   
+190 NA         NA       
+191  0.368      0.632   
+192  0.0106     0.989   
+193 NA         NA       
+> 
+> 
+> 
+> 
+> 
+> ## Now focus on Massachusetts and Connecticut facilities
+> 
+> ma <- plnt20 %>%
++     filter(PSTATABB=="MA" | PSTATABB=="CT")
+> 
+> ma %>%
++     filter(PLNGENAN>0) %>%
++     group_by(PLFUELCT) %>%
++     summarize(
++         NAMEPCAP = sum(NAMEPCAP, na.rm=TRUE),
++         PLNGENAN = sum(PLNGENAN, na.rm=TRUE),
++         PLSO2AN = sum(PLSO2AN, na.rm=TRUE),
++         PLNOXAN = sum(PLNOXAN, na.rm=TRUE),
++         PLPM25AN = sum(PLPM25AN_tons, na.rm=TRUE),
++         PLCO2EQA = sum(PLCO2EQA, na.rm=TRUE)) %>%
++     transmute(PLFUELCT,
++               NAMEPCAP / sum(NAMEPCAP),
++               PLNGENAN / sum(PLNGENAN),
++               PLSO2AN / sum(PLSO2AN),
++               PLNOXAN / sum(PLNOXAN),
++               PLPM25AN / sum(PLPM25AN),
++               PLCO2EQA / sum(PLCO2EQA)
++               )
+# A tibble: 7 × 7
+  PLFUELCT `NAMEPCAP/sum(NAMEPCAP)` `PLNGENAN/sum(PLNGENAN)` `PLSO2AN/sum(PLSO2AN)` `PLNOXAN/sum(PLNOXAN)` `PLPM25AN/sum(PLPM25AN)` `PLCO2EQA/sum(PLCO2EQA)`
+  <chr>                       <dbl>                    <dbl>                  <dbl>                  <dbl>                    <dbl>                    <dbl>
+1 BIOMASS                   0.0270                  0.0554                0.883                   0.647                   0.693                    0.154    
+2 GAS                       0.737                   0.631                 0.0793                  0.324                   0.291                    0.843    
+3 HYDRO                     0.0201                  0.0195                0                       0.00107                 0.0000334                0.0000632
+4 NUCLEAR                   0.0851                  0.263                 0                       0                       0                        0        
+5 OIL                       0.0807                  0.000599              0.0372                  0.0281                  0.0157                   0.00277  
+6 SOLAR                     0.0460                  0.0268                0.0000347               0.000434                0.000343                 0.0000147
+7 WIND                      0.00416                 0.00414               0                       0                       0                        0        
+> 
+> fossil_ma <- plnt20 %>%
++     filter(PSTATABB=="MA" | PSTATABB=="CT", PLFUELCT %in% c("COAL","GAS","OIL")) %>%
++     transmute(ORISPL, PNAME, LAT, LON, PLFUELCT, CNTYNAME, FIPS, FIPSST, FIPSCNTY, NAMEPCAP, CAPFAC, PLNGENAN, PLCO2EQA, PLNOXAN, PLSO2AN, PLPM25AN=PLPM25AN_tons, apeep)
+> 
+> 
+> saveRDS(fossil_ma, file=here("egrid2020","fossil-ma-egrid-2020.RDS"))
+> 
+> proc.time()
+   user  system elapsed 
+  5.465   1.114   6.178 

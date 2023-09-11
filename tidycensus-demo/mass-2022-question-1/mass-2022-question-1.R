@@ -1,4 +1,5 @@
 ## pdf(file="question-1.pdf",height=0,width=0, paper="USr")
+library(here)
 library(tidyverse)
 library(tidycensus)
 ## Documentation https://walker-data.com/tidycensus/articles/basic-usage.html
@@ -28,10 +29,10 @@ inc  <- income %>% mutate(
                    )
 
 ## Source: https://www.nytimes.com/interactive/2022/11/08/us/elections/results-massachusetts-question-1-create-new-income-tax-level.html
-q1times  <- read_tsv("question-1.csv")
+q1times  <- read_tsv(here("tidycensus-demo/mass-2022-question-1","question-1.csv"))
 
 ## Source: https://www.bostonglobe.com/elections/2022/massachusetts/question/1%20-%20create%20new%20income%20tax%20level/
-q1globe  <- read_tsv("question-1-globe.csv")
+q1globe  <- read_tsv(here("tidycensus-demo/mass-2022-question-1","question-1-globe.csv"))
 q1globe  <- q1globe %>%
     mutate(No = ifelse(Type1=="No", Votes1, Votes2),
            Yes = ifelse(Type1=="Yes", Votes1, Votes2),

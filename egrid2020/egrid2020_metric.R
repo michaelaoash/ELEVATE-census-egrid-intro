@@ -1,3 +1,4 @@
+library(here)
 library(tidyverse)
 library(janitor)
 options(dplyr.width=Inf, dplyr.print_max=Inf, scipen=10000)
@@ -6,12 +7,10 @@ options(width=200)
 
 rm(list=ls())
 
-setwd("egrid2020")
-
 ## APEEP marginal damage values ($/ton)  [Note 1.10231 tons/mt is needed here]
-M2014  <- read_csv("md_M_2014_DR-Krewski_VRMR-9186210.csv", 
+M2014  <- read_csv(here("egrid2020","md_M_2014_DR-Krewski_VRMR-9186210.csv"), 
                    col_names = c("NH3_M_2014", "NOx_M_2014", "PM25_M_2014", "SO2_M_2014", "VOC_M_2014"))
-md2011  <- read_xlsx("md_2011.xlsx",sheet=2, col_types=c("text","guess","guess","guess","guess","guess"))
+md2011  <- read_xlsx(here("egrid2020","md_2011.xlsx"),sheet=2, col_types=c("text","guess","guess","guess","guess","guess"))
 apeep  <- bind_cols(md2011,M2014)
 apeep <- apeep %>% mutate(
                        FIPS = str_pad(as.character(fips),width=5,pad="0")
@@ -20,14 +19,14 @@ apeep <- apeep %>% mutate(
 
 
 
-excel_sheets("egrid2020_data_metric.xlsx")
+excel_sheets(here("egrid2020","egrid2020_data_metric.xlsx"))
 
-(nms <- names(read_excel("egrid2020_data_metric.xlsx", sheet=4, skip=1, n_max = 0)))
+(nms <- names(read_excel(here("egrid2020","egrid2020_data_metric.xlsx"), sheet=4, skip=1, n_max = 0)))
 (ct <- ifelse(grepl("^ORISPL", nms), "text", "guess"))
 
-plnt20  <- read_xlsx("egrid2020_data_metric.xlsx", sheet=4, skip=1, col_types = ct )
+plnt20  <- read_xlsx(here("egrid2020","egrid2020_data_metric.xlsx"), sheet=4, skip=1, col_types = ct )
 
-dictionary.plnt20  <- read_xlsx("egrid2020_data_metric.xlsx", sheet=4, n_max=1)
+dictionary.plnt20  <- read_xlsx(here("egrid2020","egrid2020_data_metric.xlsx"), sheet=4, n_max=1)
 
 (dictionary.plnt20  <- data.frame(variable=colnames(plnt20),
                                   description=colnames(dictionary.plnt20)))
@@ -49,9 +48,9 @@ summary(plnt20$PLSO2AN)
 
 
 ## Add the Particulate Matter (PM) data.  Warning!  In short tons not metric tonnes.
-(nms <- names(read_excel("eGRID2020 DRAFT PM Emissions.xlsx", sheet="2020 PM Plant-level Data", skip=1, n_max = 0)))
+(nms <- names(read_excel(here("egrid2020","eGRID2020 DRAFT PM Emissions.xlsx"), sheet="2020 PM Plant-level Data", skip=1, n_max = 0)))
 (ct <- ifelse(grepl("^ORISPL", nms), "text", "guess"))
-egrid_pm25_2020  <- read_xlsx("eGRID2020 DRAFT PM Emissions.xlsx", sheet="2020 PM Plant-level Data", skip=1, col_types = ct )
+egrid_pm25_2020  <- read_xlsx(here("egrid2020","eGRID2020 DRAFT PM Emissions.xlsx"), sheet="2020 PM Plant-level Data", skip=1, col_types = ct )
 egrid_pm25_2020  <- egrid_pm25_2020 %>%
     transmute(
         ORISPL,
@@ -131,5 +130,5 @@ fossil_ma <- plnt20 %>%
     filter(PSTATABB=="MA" | PSTATABB=="CT", PLFUELCT %in% c("COAL","GAS","OIL")) %>%
     select(ORISPL, PNAME, LAT, LON, PLFUELCT, CNTYNAME, FIPS, FIPSST, FIPSCNTY, NAMEPCAP, CAPFAC, PLNGENAN, PLCO2EQA, PLNOXAN, PLSO2AN, PLPM25AN, apeep)
 
-saveRDS(fossil_ma, file="fossil-ma-egrid-2020.RDS")
+saveRDS(fossil_ma, file=here("egrid2020","fossil-ma-egrid-2020.RDS"))
 

@@ -1,6 +1,7 @@
 ## pdf(file="holyoke-poverty.pdf",height=0,width=0, paper="USr")
 ## https://www.holyoke.org/maps-of-holyoke/
 ## https://en.wikipedia.org/wiki/Template:Holyoke,_Massachusetts_Labelled_Map
+library(here)
 library(tidyverse)
 library(janitor)
 library(tidycensus)
@@ -16,7 +17,7 @@ options(rlang_backtrace_on_error = "none")
 ## https://api.census.gov/data/key_signup.html
 census_api_key("cb9bd8756de7ba64b3c95ec0bd9193fc98d7cfe1")
 
-setwd("tidycensus-demo/holyoke/")  ## Possibly not needed.
+
 
 ## Variable list for American Community Survey (ACS) of the U.S. Bureau of the Census
 ## Looking for variables with grep
@@ -45,18 +46,6 @@ holyoke_acs2020 <- ma_towns_acs2020 %>% filter(NAME.x=="Holyoke")
 
 ## Download blockgroup-level family poverty counts for all of Massachusetts
 ma_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="MA", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
-                                  variables = c(
-                                      "B17010_004",
-                                      "B17010_011",
-                                      "B17010_017",
-                                      "B17010_024",
-                                      "B17010_031",
-                                      "B17010_037"
-                                  )
-                                  )
-
-
-pr_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="PR", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
                                   variables = c(
                                       "B17010_004",
                                       "B17010_011",
@@ -106,7 +95,6 @@ ggplot(holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=ward))
 
 
 ## Limit roads to interstates and major roads in Providence
-## roads  <- st_read("tl_25013/tl_2022_25013_roads.shp") %>% filter(MTFCC %in% c("S1100","S1200"))
 hampden_roads <- roads(state="MA", county="013") 
 
 ## s2::s2_options(model = "closed", snap = s2::s2_snap_level(30))
@@ -139,7 +127,7 @@ ggplot(holyoke_blockgroups_acs2020) +
 
 
 ## Distance from each Massachusetts fossil fuel facility in MA to each of the Seven Wards of Holyoke
-fossil_ma <- readRDS("../../egrid2020/fossil-ma-egrid-2020.RDS")
+fossil_ma <- readRDS(here("egrid2020","fossil-ma-egrid-2020.RDS"))
 fossil_ma_sf <- st_as_sf(fossil_ma, crs="NAD83", coords = c("LON", "LAT"))
 st_distance(fossil_ma_sf, holyoke_VTD_2020)
 
