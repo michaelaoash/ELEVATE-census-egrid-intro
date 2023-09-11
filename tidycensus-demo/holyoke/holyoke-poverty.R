@@ -55,6 +55,19 @@ ma_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="M
                                   )
                                   )
 
+
+ma_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="PR", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
+                                  variables = c(
+                                      "B17010_004",
+                                      "B17010_011",
+                                      "B17010_017",
+                                      "B17010_024",
+                                      "B17010_031",
+                                      "B17010_037"
+                                  )
+                                  )
+
+
 ## Compute the poverty rate from the count data
 ma_blockgroups_acs2020 <- ma_blockgroups_acs2020 %>% mutate(
                                                          poor_families_with_children = B17010_004E + B17010_011E + B17010_017E,
