@@ -45,6 +45,9 @@ ma_towns_acs2020 <- get_acs(year=2020, geography = "county subdivision", state="
 holyoke_acs2020 <- ma_towns_acs2020 %>% filter(NAME.x=="Holyoke")
 
 ## Download blockgroup-level family poverty counts for all of Massachusetts
+## Note of caution: Note that every variable has a version that ends in "E" (estimate) and "M" (margin of error)
+## Use the E values for the main analysis but review the margin of error (which can be large for detailed categories in small areas)
+## Consider tracts instead of block groups for more precision (lower margin of error)
 ma_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="MA", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
                                   variables = c(
                                       "B17010_004",

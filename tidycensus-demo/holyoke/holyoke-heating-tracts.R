@@ -31,12 +31,11 @@ ma_towns_acs2020 <- get_acs(year=2020, geography = "county subdivision", state="
                             variables = "B01001_001")
 holyoke_acs2020 <- ma_towns_acs2020 %>% filter(NAME.x=="Holyoke")
 
-## Download blockgroup-level heating/tenure variables (counts) for Hampden County
 ## Download tract-level heating/tenure variables (counts) for Hampden County
 ## Note of caution: Note that every variable has a version that ends in "E" (estimate) and "M" (margin of error)
 ## Use the E values for the main analysis but review the margin of error (which can be large for detailed categories in small areas)
 ## Consider tracts instead of block groups for more precision (lower margin of error)
-hampden_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", state="MA", county="013", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
+hampden_tracts_acs2020 <- get_acs(year=2020, geography = "tract", state="MA", county="013", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
                                        variables = c(
                                            "B25003_001",
                                            "B25003_002",
@@ -55,10 +54,10 @@ hampden_blockgroups_acs2020 <- get_acs(year=2020, geography = "block group", sta
                                            "B992511_002",
                                            "B992511_003"
                                        )
-                                       )
+                                  )
 
 ## Compute rates from count data
-hampden_blockgroups_acs2020 <- hampden_blockgroups_acs2020 %>%
+hampden_tracts_acs2020 <- hampden_tracts_acs2020 %>%
     mutate(
         owner_occupied_rt = B25003_002E / B25003_001E * 100,
         renter_occupied_rt = B25003_003E / B25003_001E * 100,
@@ -75,13 +74,13 @@ hampden_blockgroups_acs2020 <- hampden_blockgroups_acs2020 %>%
         )
 
 ## Plot some maps
-ggplot(hampden_blockgroups_acs2020) + geom_sf()
+ggplot(hampden_tracts_acs2020) + geom_sf()
 
 ## As it happens, Tracts can neatly distinguish Holyoke from surrounding cities and towns.
-holyoke_blockgroups_acs2020 <- filter(hampden_blockgroups_acs2020, substr(TRACTCE,1,4) %in% c("8114","8115","8116","8117","8118","8119","8120","8121"))
-ggplot(holyoke_blockgroups_acs2020) + geom_sf() + geom_sf_text(aes(label=GEOID))
-ggplot(holyoke_blockgroups_acs2020) + geom_sf(aes(fill=renter_occupied_rt))
-ggplot(holyoke_blockgroups_acs2020) + geom_sf(aes(fill=heat_oil_rt))
+holyoke_tracts_acs2020 <- filter(hampden_tracts_acs2020, substr(TRACTCE,1,4) %in% c("8114","8115","8116","8117","8118","8119","8120","8121"))
+ggplot(holyoke_tracts_acs2020) + geom_sf() + geom_sf_text(aes(label=GEOID))
+ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=renter_occupied_rt))
+ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=heat_oil_rt))
 
 
 ## Add some decoration: Voting districts (Wards), roads, and water
@@ -119,7 +118,7 @@ ggplot(data=holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=ward)) +
 
 ## Map Renters, Oil Heat, Utility Gas Heat, Electric Heat, and Allocated Data for Heat
 ## Renters
-ggplot(holyoke_blockgroups_acs2020) +
+ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=renter_occupied_rt), lwd=0) +
     scale_fill_gradient(low="gray", high="yellow") +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
@@ -129,7 +128,7 @@ ggplot(holyoke_blockgroups_acs2020) +
 
 
 ## Oil heat
-ggplot(holyoke_blockgroups_acs2020) +
+ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=heat_oil_rt), lwd=0) +
     scale_fill_gradient(low="gray", high="yellow") +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
@@ -138,7 +137,7 @@ ggplot(holyoke_blockgroups_acs2020) +
     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
 
 ## Utility (HGE presumably) Gas heat
-ggplot(holyoke_blockgroups_acs2020) +
+ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=heat_util_gas_rt), lwd=0) +
     scale_fill_gradient(low="gray", high="yellow") +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
@@ -147,7 +146,7 @@ ggplot(holyoke_blockgroups_acs2020) +
     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
 
 ## Electric heat
-ggplot(holyoke_blockgroups_acs2020) +
+ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=heat_electricity_rt), lwd=0) +
     scale_fill_gradient(low="gray", high="yellow") +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
@@ -156,7 +155,7 @@ ggplot(holyoke_blockgroups_acs2020) +
     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
 
 ## Allocated (estimated) heat data
-ggplot(holyoke_blockgroups_acs2020) +
+ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=heat_estimated_rt), lwd=0) +
     scale_fill_gradient(low="gray", high="yellow") +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
