@@ -127,7 +127,7 @@ ma %>%
 
 
 fossil_ma <- plnt20 %>%
-    filter(PSTATABB=="MA" | PSTATABB=="CT", PLFUELCT %in% c("COAL","GAS","OIL")) %>%
+    filter(PSTATABB=="MA", PLFUELCT %in% c("COAL","GAS","OIL")) %>%
     select(ORISPL, PNAME, LAT, LON, PLFUELCT, CNTYNAME, FIPS, FIPSST, FIPSCNTY, NAMEPCAP, CAPFAC, PLNGENAN, PLCO2EQA, PLNOXAN, PLSO2AN, PLPM25AN, apeep)
 
 saveRDS(fossil_ma, file=here("egrid2020","fossil-ma-egrid-2020.RDS"))

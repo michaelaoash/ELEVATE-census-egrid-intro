@@ -119,7 +119,7 @@ ma %>%
               )
 
 fossil_ma <- plnt20 %>%
-    filter(PSTATABB=="MA" | PSTATABB=="CT", PLFUELCT %in% c("COAL","GAS","OIL")) %>%
+    filter(PSTATABB=="MA", PLFUELCT %in% c("COAL","GAS","OIL")) %>%
     transmute(ORISPL, PNAME, LAT, LON, PLFUELCT, CNTYNAME, FIPS, FIPSST, FIPSCNTY, NAMEPCAP, CAPFAC, PLNGENAN, PLCO2EQA, PLNOXAN, PLSO2AN, PLPM25AN=PLPM25AN_tons, apeep)
 
 
