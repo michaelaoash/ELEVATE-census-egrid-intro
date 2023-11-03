@@ -101,9 +101,9 @@ plnt20 %>%
     select(PNAME,UTLSRVNM,OPRNAME,SECTOR,PSTATABB,PLFUELCT,NAMEPCAP,PLCO2EQA,PLCLPR,PLOLPR,PLGSPR)
 
 
-## Now focus on Massachusetts and Connecticut facilities
+## Now focus on Massachusetts
 ma <- plnt20 %>%
-    filter(PSTATABB=="MA" | PSTATABB=="CT")
+    filter(PSTATABB=="MA")
 
 ma %>%
     filter(PLNGENAN>0) %>%

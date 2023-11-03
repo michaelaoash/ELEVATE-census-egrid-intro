@@ -693,10 +693,10 @@ dbl (5): NH3_M_2014, NOx_M_2014, PM25_M_2014, SO2_M_2014, VOC_M_2014
 > 
 > 
 > 
-> ## Now focus on Massachusetts and Connecticut facilities
+> ## Now focus on Massachusetts facilities
 > 
 > ma <- plnt20 %>%
-+     filter(PSTATABB=="MA" | PSTATABB=="CT")
++     filter(PSTATABB=="MA")
 > 
 > ma %>%
 +     filter(PLNGENAN>0) %>%
@@ -716,16 +716,15 @@ dbl (5): NH3_M_2014, NOx_M_2014, PM25_M_2014, SO2_M_2014, VOC_M_2014
 +               PLPM25AN / sum(PLPM25AN),
 +               PLCO2EQA / sum(PLCO2EQA)
 +               )
-# A tibble: 7 × 7
+# A tibble: 6 × 7
   PLFUELCT `NAMEPCAP/sum(NAMEPCAP)` `PLNGENAN/sum(PLNGENAN)` `PLSO2AN/sum(PLSO2AN)` `PLNOXAN/sum(PLNOXAN)` `PLPM25AN/sum(PLPM25AN)` `PLCO2EQA/sum(PLCO2EQA)`
   <chr>                       <dbl>                    <dbl>                  <dbl>                  <dbl>                    <dbl>                    <dbl>
-1 BIOMASS                   0.0270                  0.0554                0.883                   0.647                   0.693                    0.154    
-2 GAS                       0.737                   0.631                 0.0793                  0.324                   0.291                    0.843    
-3 HYDRO                     0.0201                  0.0195                0                       0.00107                 0.0000334                0.0000632
-4 NUCLEAR                   0.0851                  0.263                 0                       0                       0                        0        
-5 OIL                       0.0807                  0.000599              0.0372                  0.0281                  0.0157                   0.00277  
-6 SOLAR                     0.0460                  0.0268                0.0000347               0.000434                0.000343                 0.0000147
-7 WIND                      0.00416                 0.00414               0                       0                       0                        0        
+1 BIOMASS                   0.0296                  0.104                 0.948                   0.764                    0.842                   0.216    
+2 GAS                       0.823                   0.763                 0.0390                  0.218                    0.151                   0.782    
+3 HYDRO                     0.0204                  0.0451                0                       0                        0                       0        
+4 OIL                       0.0509                  0.000493              0.0126                  0.0167                   0.00657                 0.00145  
+5 SOLAR                     0.0692                  0.0748                0.0000433               0.000789                 0.000432                0.0000347
+6 WIND                      0.00690                 0.0127                0                       0                        0                       0        
 > 
 > fossil_ma <- plnt20 %>%
 +     filter(PSTATABB=="MA" | PSTATABB=="CT", PLFUELCT %in% c("COAL","GAS","OIL")) %>%
@@ -736,4 +735,4 @@ dbl (5): NH3_M_2014, NOx_M_2014, PM25_M_2014, SO2_M_2014, VOC_M_2014
 > 
 > proc.time()
    user  system elapsed 
-  5.465   1.114   6.178 
+  5.377   1.276   6.282 

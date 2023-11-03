@@ -94,10 +94,10 @@ plnt20 %>%
 
 
 
-## Now focus on Massachusetts and Connecticut facilities
+## Now focus on Massachusetts facilities
 
 ma <- plnt20 %>%
-    filter(PSTATABB=="MA" | PSTATABB=="CT")
+    filter(PSTATABB=="MA")
 
 ma %>%
     filter(PLNGENAN>0) %>%
