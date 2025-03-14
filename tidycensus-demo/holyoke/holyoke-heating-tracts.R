@@ -1,4 +1,4 @@
-## pdf(file="holyoke-heating.pdf",height=0,width=0, paper="USr")
+pdf(file="holyoke-heating-tracts.pdf",height=0,width=0, paper="USr")
 ## https://www.holyoke.org/maps-of-holyoke/
 ## https://en.wikipedia.org/wiki/Template:Holyoke,_Massachusetts_Labelled_Map
 library(here)
@@ -73,14 +73,29 @@ hampden_tracts_acs2020 <- hampden_tracts_acs2020 %>%
         heat_estimated_rt = B992511_002E / B992511_001E * 100
         )
 
+## Compute most common modal heat source
+heat_source <- hampden_tracts_acs2020 %>%
+    select(GEOID, heat_util_gas_rt, heat_tank_gas_rt, heat_electricity_rt, heat_oil_rt, heat_coal_rt, heat_wood_rt, heat_solar_rt, heat_other_rt, heat_none_rt) %>%
+    st_drop_geometry()
+modal_heat <- tidyfst::col_max(heat_source, .name="modal_heat_source") %>%
+    select(GEOID, modal_heat_source) %>%
+    mutate(
+        modal_heat_source = gsub("heat_", "", modal_heat_source),
+        modal_heat_source = gsub("_rt", "", modal_heat_source)
+        )
+hampden_tracts_acs2020 <- left_join(hampden_tracts_acs2020,modal_heat)
+
+
+
+
 ## Plot some maps
-ggplot(hampden_tracts_acs2020) + geom_sf()
+## ggplot(hampden_tracts_acs2020) + geom_sf()
 
 ## As it happens, Tracts can neatly distinguish Holyoke from surrounding cities and towns.
 holyoke_tracts_acs2020 <- filter(hampden_tracts_acs2020, substr(TRACTCE,1,4) %in% c("8114","8115","8116","8117","8118","8119","8120","8121"))
-ggplot(holyoke_tracts_acs2020) + geom_sf() + geom_sf_text(aes(label=GEOID))
-ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=renter_occupied_rt))
-ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=heat_oil_rt))
+## ggplot(holyoke_tracts_acs2020) + geom_sf() + geom_sf_text(aes(label=GEOID))
+## ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=renter_occupied_rt))
+## ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=heat_oil_rt))
 
 
 ## Add some decoration: Voting districts (Wards), roads, and water
@@ -89,7 +104,7 @@ ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=heat_oil_rt))
 hampden_VTD_2020 <- voting_districts(state="MA", county="013")
 filter(hampden_VTD_2020,grepl('Holyoke', NAME20, ignore.case=TRUE )) %>% print(n=Inf)
 holyoke_VTD_2020 <- filter(hampden_VTD_2020, as.numeric(substr(VTDST20,1,6))>=930, as.numeric(substr(VTDST20,1,6))<=943)
-ggplot(holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=NAME20))
+## ggplot(holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=NAME20))
 holyoke_VTD_2020 <- holyoke_VTD_2020 %>% mutate(
                          ward = substr(NAME20,14,19)
                      ) %>%
@@ -108,38 +123,29 @@ hampden_area_water <- area_water(state="MA", county="013")
 holyoke_water <- st_intersection(hampden_area_water,holyoke_acs2020)
 
 ## Check roads, water, Wards
-ggplot(data=holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=ward)) +
-    geom_sf(data=holyoke_water, fill="blue") +
-    geom_sf(data=holyoke_roads, color="pink") + 
-    geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
-    geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+## ggplot(data=holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=ward)) +
+##     geom_sf(data=holyoke_water, fill="blue") +
+##     geom_sf(data=holyoke_roads, color="pink") + 
+##     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
+##     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
 
 
 
 ## Map Renters, Oil Heat, Utility Gas Heat, Electric Heat, and Allocated Data for Heat
 ## Renters
-ggplot(holyoke_tracts_acs2020) +
-    geom_sf(aes(fill=renter_occupied_rt), lwd=0) +
-    scale_fill_gradient(low="gray", high="yellow") +
-    geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
-    geom_sf(data=holyoke_water, fill="blue") +
-    geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
-    geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+## ggplot(holyoke_tracts_acs2020) +
+##     geom_sf(aes(fill=renter_occupied_rt), lwd=0) +
+##     scale_fill_gradient(low="gray", high="yellow") +
+##     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
+##     geom_sf(data=holyoke_water, fill="blue") +
+##     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
+##     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
 
-
-## Oil heat
-ggplot(holyoke_tracts_acs2020) +
-    geom_sf(aes(fill=heat_oil_rt), lwd=0) +
-    scale_fill_gradient(low="gray", high="yellow") +
-    geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
-    geom_sf(data=holyoke_water, fill="blue") +
-    geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
-    geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
 
 ## Utility (HGE presumably) Gas heat
 ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=heat_util_gas_rt), lwd=0) +
-    scale_fill_gradient(low="gray", high="yellow") +
+    scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
     geom_sf(data=holyoke_water, fill="blue") +
     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
@@ -148,19 +154,36 @@ ggplot(holyoke_tracts_acs2020) +
 ## Electric heat
 ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=heat_electricity_rt), lwd=0) +
-    scale_fill_gradient(low="gray", high="yellow") +
+    scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
     geom_sf(data=holyoke_water, fill="blue") +
     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+
+## Oil heat
+ggplot(holyoke_tracts_acs2020) +
+    geom_sf(aes(fill=heat_oil_rt), lwd=0) +
+    scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
+    geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
+    geom_sf(data=holyoke_water, fill="blue") +
+    geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
+    geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+
+## Modal (most common) heat source
+ggplot(holyoke_tracts_acs2020) +
+    geom_sf(aes(fill=modal_heat_source), lwd=0) +
+    geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
+    geom_sf(data=holyoke_water, fill="blue") +
+    geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
+    geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+
 
 ## Allocated (estimated) heat data
 ggplot(holyoke_tracts_acs2020) +
     geom_sf(aes(fill=heat_estimated_rt), lwd=0) +
-    scale_fill_gradient(low="gray", high="yellow") +
+    scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
     geom_sf(data=holyoke_water, fill="blue") +
     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
-
 

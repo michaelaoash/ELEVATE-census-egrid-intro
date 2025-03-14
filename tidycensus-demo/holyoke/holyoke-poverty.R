@@ -97,7 +97,7 @@ holyoke_VTD_2020 <- holyoke_VTD_2020 %>% mutate(
 ggplot(holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=ward))
 
 
-## Limit roads to interstates and major roads in Providence
+## Limit roads to interstates and major roads in Holyoke
 hampden_roads <- roads(state="MA", county="013") 
 
 ## s2::s2_options(model = "closed", snap = s2::s2_snap_level(30))

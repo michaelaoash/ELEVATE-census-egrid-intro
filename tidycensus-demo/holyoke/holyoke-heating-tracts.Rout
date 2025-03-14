@@ -1,0 +1,312 @@
+> pdf(file="holyoke-heating-tracts.pdf",height=0,width=0, paper="USr")
+> ## https://www.holyoke.org/maps-of-holyoke/
+> ## https://en.wikipedia.org/wiki/Template:Holyoke,_Massachusetts_Labelled_Map
+> library(here)
+here() starts at /home/mash/Desktop/ETI/ELEVATE-census-egrid-intro
+> library(tidyverse)
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+> library(janitor)
+
+Attaching package: ‘janitor’
+
+The following objects are masked from ‘package:stats’:
+
+    chisq.test, fisher.test
+
+> library(tidycensus)
+> library(tigris)
+To enable caching of data, set `options(tigris_use_cache = TRUE)`
+in your R script or .Rprofile.
+> options(tigris_use_cache = TRUE)
+> library(sp)
+The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
+which was just loaded, will retire in October 2023.
+Please refer to R-spatial evolution reports for details, especially
+https://r-spatial.org/r/2023/05/15/evolution4.html.
+It may be desirable to make the sf package available;
+package maintainers should consider adding sf to Suggests:.
+The sp package is now running under evolution status 2
+     (status 2 uses the sf package in place of rgdal)
+> library(sf)
+Linking to GEOS 3.12.0, GDAL 3.7.1, PROJ 9.2.1; sf_use_s2() is TRUE
+> options(width=400)
+> options(tibble.width=Inf)
+> options(rlang_backtrace_on_error = "none")
+> ## Documentation https://walker-data.com/tidycensus/articles/basic-usage.html
+> ## Get your own Census API Key
+> ## https://api.census.gov/data/key_signup.html
+> census_api_key("cb9bd8756de7ba64b3c95ec0bd9193fc98d7cfe1")
+To install your API key for use in future sessions, run this function with `install = TRUE`.
+> 
+> 
+> 
+> ## Variable list for American Community Survey (ACS) of the U.S. Bureau of the Census
+> ## Looking for variables with grep
+> acs_v2020 <- load_variables(2020, "acs5", cache = TRUE)
+> acs_v2020 %>% filter(grepl("HEATING", concept)) %>% print(n=50)
+# A tibble: 34 × 4
+   name        label                                                        concept                          geography  
+   <chr>       <chr>                                                        <chr>                            <chr>      
+ 1 B25040_001  Estimate!!Total:                                             HOUSE HEATING FUEL               block group
+ 2 B25040_002  Estimate!!Total:!!Utility gas                                HOUSE HEATING FUEL               block group
+ 3 B25040_003  Estimate!!Total:!!Bottled, tank, or LP gas                   HOUSE HEATING FUEL               block group
+ 4 B25040_004  Estimate!!Total:!!Electricity                                HOUSE HEATING FUEL               block group
+ 5 B25040_005  Estimate!!Total:!!Fuel oil, kerosene, etc.                   HOUSE HEATING FUEL               block group
+ 6 B25040_006  Estimate!!Total:!!Coal or coke                               HOUSE HEATING FUEL               block group
+ 7 B25040_007  Estimate!!Total:!!Wood                                       HOUSE HEATING FUEL               block group
+ 8 B25040_008  Estimate!!Total:!!Solar energy                               HOUSE HEATING FUEL               block group
+ 9 B25040_009  Estimate!!Total:!!Other fuel                                 HOUSE HEATING FUEL               block group
+10 B25040_010  Estimate!!Total:!!No fuel used                               HOUSE HEATING FUEL               block group
+11 B25117_001  Estimate!!Total:                                             TENURE BY HOUSE HEATING FUEL     tract      
+12 B25117_002  Estimate!!Total:!!Owner occupied:                            TENURE BY HOUSE HEATING FUEL     tract      
+13 B25117_003  Estimate!!Total:!!Owner occupied:!!Utility gas               TENURE BY HOUSE HEATING FUEL     tract      
+14 B25117_004  Estimate!!Total:!!Owner occupied:!!Bottled, tank, or LP gas  TENURE BY HOUSE HEATING FUEL     tract      
+15 B25117_005  Estimate!!Total:!!Owner occupied:!!Electricity               TENURE BY HOUSE HEATING FUEL     tract      
+16 B25117_006  Estimate!!Total:!!Owner occupied:!!Fuel oil, kerosene, etc.  TENURE BY HOUSE HEATING FUEL     tract      
+17 B25117_007  Estimate!!Total:!!Owner occupied:!!Coal or coke              TENURE BY HOUSE HEATING FUEL     tract      
+18 B25117_008  Estimate!!Total:!!Owner occupied:!!Wood                      TENURE BY HOUSE HEATING FUEL     tract      
+19 B25117_009  Estimate!!Total:!!Owner occupied:!!Solar energy              TENURE BY HOUSE HEATING FUEL     tract      
+20 B25117_010  Estimate!!Total:!!Owner occupied:!!Other fuel                TENURE BY HOUSE HEATING FUEL     tract      
+21 B25117_011  Estimate!!Total:!!Owner occupied:!!No fuel used              TENURE BY HOUSE HEATING FUEL     tract      
+22 B25117_012  Estimate!!Total:!!Renter occupied:                           TENURE BY HOUSE HEATING FUEL     tract      
+23 B25117_013  Estimate!!Total:!!Renter occupied:!!Utility gas              TENURE BY HOUSE HEATING FUEL     tract      
+24 B25117_014  Estimate!!Total:!!Renter occupied:!!Bottled, tank, or LP gas TENURE BY HOUSE HEATING FUEL     tract      
+25 B25117_015  Estimate!!Total:!!Renter occupied:!!Electricity              TENURE BY HOUSE HEATING FUEL     tract      
+26 B25117_016  Estimate!!Total:!!Renter occupied:!!Fuel oil, kerosene, etc. TENURE BY HOUSE HEATING FUEL     tract      
+27 B25117_017  Estimate!!Total:!!Renter occupied:!!Coal or coke             TENURE BY HOUSE HEATING FUEL     tract      
+28 B25117_018  Estimate!!Total:!!Renter occupied:!!Wood                     TENURE BY HOUSE HEATING FUEL     tract      
+29 B25117_019  Estimate!!Total:!!Renter occupied:!!Solar energy             TENURE BY HOUSE HEATING FUEL     tract      
+30 B25117_020  Estimate!!Total:!!Renter occupied:!!Other fuel               TENURE BY HOUSE HEATING FUEL     tract      
+31 B25117_021  Estimate!!Total:!!Renter occupied:!!No fuel used             TENURE BY HOUSE HEATING FUEL     tract      
+32 B992511_001 Estimate!!Total:                                             ALLOCATION OF HOUSE HEATING FUEL block group
+33 B992511_002 Estimate!!Total:!!Allocated                                  ALLOCATION OF HOUSE HEATING FUEL block group
+34 B992511_003 Estimate!!Total:!!Not allocated                              ALLOCATION OF HOUSE HEATING FUEL block group
+> acs_v2020 %>% filter(concept=="TENURE") %>% print(n=15)
+# A tibble: 3 × 4
+  name       label                             concept geography  
+  <chr>      <chr>                             <chr>   <chr>      
+1 B25003_001 Estimate!!Total:                  TENURE  block group
+2 B25003_002 Estimate!!Total:!!Owner occupied  TENURE  block group
+3 B25003_003 Estimate!!Total:!!Renter occupied TENURE  block group
+> 
+> 
+> ## Use these to get the outline of Holyoke (for cutting maps)
+> ma_towns_acs2020 <- get_acs(year=2020, geography = "county subdivision", state="MA", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
++                             variables = "B01001_001")
+Getting data from the 2016-2020 5-year ACS
+> holyoke_acs2020 <- ma_towns_acs2020 %>% filter(NAME.x=="Holyoke")
+> 
+> ## Download tract-level heating/tenure variables (counts) for Hampden County
+> ## Note of caution: Note that every variable has a version that ends in "E" (estimate) and "M" (margin of error)
+> ## Use the E values for the main analysis but review the margin of error (which can be large for detailed categories in small areas)
+> ## Consider tracts instead of block groups for more precision (lower margin of error)
+> hampden_tracts_acs2020 <- get_acs(year=2020, geography = "tract", state="MA", county="013", keep_geo_vars=TRUE, geometry = TRUE, output="wide",
++                                        variables = c(
++                                            "B25003_001",
++                                            "B25003_002",
++                                            "B25003_003",                                           
++                                            "B25040_001",
++                                            "B25040_002",
++                                            "B25040_003",
++                                            "B25040_004",
++                                            "B25040_005",
++                                            "B25040_006",
++                                            "B25040_007",
++                                            "B25040_008",
++                                            "B25040_009",
++                                            "B25040_010",
++                                            "B992511_001",
++                                            "B992511_002",
++                                            "B992511_003"
++                                        )
++                                   )
+Getting data from the 2016-2020 5-year ACS
+> 
+> ## Compute rates from count data
+> hampden_tracts_acs2020 <- hampden_tracts_acs2020 %>%
++     mutate(
++         owner_occupied_rt = B25003_002E / B25003_001E * 100,
++         renter_occupied_rt = B25003_003E / B25003_001E * 100,
++         heat_util_gas_rt = B25040_002E / B25040_001E * 100,
++         heat_tank_gas_rt = B25040_003E / B25040_001E * 100,
++         heat_electricity_rt = B25040_004E / B25040_001E * 100,
++         heat_oil_rt = B25040_005E / B25040_001E * 100,
++         heat_coal_rt = B25040_006E / B25040_001E * 100,
++         heat_wood_rt = B25040_007E / B25040_001E * 100,
++         heat_solar_rt = B25040_008E / B25040_001E * 100,
++         heat_other_rt = B25040_009E / B25040_001E * 100,
++         heat_none_rt = B25040_010E / B25040_001E * 100,
++         heat_estimated_rt = B992511_002E / B992511_001E * 100
++         )
+> 
+> ## Compute most common modal heat source
+> heat_source <- hampden_tracts_acs2020 %>%
++     select(GEOID, heat_util_gas_rt, heat_tank_gas_rt, heat_electricity_rt, heat_oil_rt, heat_coal_rt, heat_wood_rt, heat_solar_rt, heat_other_rt, heat_none_rt) %>%
++     st_drop_geometry()
+> modal_heat <- tidyfst::col_max(heat_source, .name="modal_heat_source") %>%
++     select(GEOID, modal_heat_source) %>%
++     mutate(
++         modal_heat_source = gsub("heat_", "", modal_heat_source),
++         modal_heat_source = gsub("_rt", "", modal_heat_source)
++         )
+> hampden_tracts_acs2020 <- left_join(hampden_tracts_acs2020,modal_heat)
+Joining with `by = join_by(GEOID)`
+> 
+> 
+> 
+> 
+> ## Plot some maps
+> ## ggplot(hampden_tracts_acs2020) + geom_sf()
+> 
+> ## As it happens, Tracts can neatly distinguish Holyoke from surrounding cities and towns.
+> holyoke_tracts_acs2020 <- filter(hampden_tracts_acs2020, substr(TRACTCE,1,4) %in% c("8114","8115","8116","8117","8118","8119","8120","8121"))
+> ## ggplot(holyoke_tracts_acs2020) + geom_sf() + geom_sf_text(aes(label=GEOID))
+> ## ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=renter_occupied_rt))
+> ## ggplot(holyoke_tracts_acs2020) + geom_sf(aes(fill=heat_oil_rt))
+> 
+> 
+> ## Add some decoration: Voting districts (Wards), roads, and water
+> ## Source: https://www2.census.gov/geo/tiger/TIGER2022/
+> ## Get the 2020 Precinct Map of Hampden (from Census/Tigerline) and collapse to wards
+> hampden_VTD_2020 <- voting_districts(state="MA", county="013")
+> filter(hampden_VTD_2020,grepl('Holyoke', NAME20, ignore.case=TRUE )) %>% print(n=Inf)
+Simple feature collection with 14 features and 14 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -72.69046 ymin: 42.16203 xmax: -72.59022 ymax: 42.28626
+Geodetic CRS:  NAD83
+   STATEFP20 COUNTYFP20 VTDST20     GEOID20 VTDI20                         NAME20                     NAMELSAD20 LSAD20 MTFCC20 FUNCSTAT20  ALAND20 AWATER20  INTPTLAT20   INTPTLON20                       geometry
+1         25        013  000930 25013000930      A Holyoke City Ward 1 Precinct A Holyoke City Ward 1 Precinct A     00   G5240          N  1314685   274112 +42.2028556 -072.5990422 POLYGON ((-72.61141 42.2015...
+2         25        013  000931 25013000931      A Holyoke City Ward 1 Precinct B Holyoke City Ward 1 Precinct B     00   G5240          N  1053408   265674 +42.2089942 -072.6063472 POLYGON ((-72.61529 42.2034...
+3         25        013  000932 25013000932      A Holyoke City Ward 2 Precinct A Holyoke City Ward 2 Precinct A     00   G5240          N  2451601   524899 +42.1692867 -072.6348401 POLYGON ((-72.64378 42.1673...
+4         25        013  000933 25013000933      A Holyoke City Ward 2 Precinct B Holyoke City Ward 2 Precinct B     00   G5240          N  1075453    40625 +42.1968307 -072.6154201 POLYGON ((-72.62266 42.1932...
+5         25        013  000934 25013000934      A Holyoke City Ward 3 Precinct A Holyoke City Ward 3 Precinct A     00   G5240          N  1175605        0 +42.1937760 -072.6261518 POLYGON ((-72.63367 42.1909...
+6         25        013  000935 25013000935      A Holyoke City Ward 3 Precinct B Holyoke City Ward 3 Precinct B     00   G5240          N  1749091        0 +42.1930421 -072.6387395 POLYGON ((-72.65061 42.1872...
+7         25        013  000936 25013000936      A Holyoke City Ward 4 Precinct A Holyoke City Ward 4 Precinct A     00   G5240          N   342695        0 +42.2063549 -072.6159338 POLYGON ((-72.62118 42.2042...
+8         25        013  000937 25013000937      A Holyoke City Ward 4 Precinct B Holyoke City Ward 4 Precinct B     00   G5240          N   609646        0 +42.2109651 -072.6180081 POLYGON ((-72.62293 42.2052...
+9         25        013  000938 25013000938      A Holyoke City Ward 5 Precinct A Holyoke City Ward 5 Precinct A     00   G5240          N 16887346  1277277 +42.1862652 -072.6738684 POLYGON ((-72.69046 42.2130...
+10        25        013  000939 25013000939      A Holyoke City Ward 5 Precinct B Holyoke City Ward 5 Precinct B     00   G5240          N  2770640      812 +42.1771127 -072.6415302 POLYGON ((-72.65442 42.1717...
+11        25        013  000940 25013000940      A Holyoke City Ward 6 Precinct A Holyoke City Ward 6 Precinct A     00   G5240          N  1689894        0 +42.2058251 -072.6373880 POLYGON ((-72.64691 42.2044...
+12        25        013  000941 25013000941      A Holyoke City Ward 6 Precinct B Holyoke City Ward 6 Precinct B     00   G5240          N  1098493        0 +42.2072884 -072.6278250 POLYGON ((-72.63743 42.2072...
+13        25        013  000942 25013000942      A Holyoke City Ward 7 Precinct A Holyoke City Ward 7 Precinct A     00   G5240          N 20586930  1376650 +42.2463673 -072.6402725 POLYGON ((-72.6696 42.21821...
+14        25        013  000943 25013000943      A Holyoke City Ward 7 Precinct B Holyoke City Ward 7 Precinct B     00   G5240          N  2011170   466459 +42.2215908 -072.6200803 POLYGON ((-72.62953 42.2130...
+> holyoke_VTD_2020 <- filter(hampden_VTD_2020, as.numeric(substr(VTDST20,1,6))>=930, as.numeric(substr(VTDST20,1,6))<=943)
+> ## ggplot(holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=NAME20))
+> holyoke_VTD_2020 <- holyoke_VTD_2020 %>% mutate(
++                          ward = substr(NAME20,14,19)
++                      ) %>%
++     group_by(ward) %>%
++     summarize()
+> 
+> ## Get roads and limit to interstates and major roads in Holyoke
+> hampden_roads <- roads(state="MA", county="013") 
+> ## s2::s2_options(model = "closed", snap = s2::s2_snap_level(30))
+> sf_use_s2(FALSE)  ## Aagh don't understand but needed. A GIS issue
+Spherical geometry (s2) switched off
+> holyoke_roads  <- hampden_roads %>% filter(MTFCC %in% c("S1100","S1200")) %>% st_intersection(holyoke_acs2020, hampden_roads, model="open")
+although coordinates are longitude/latitude, st_intersection assumes that they are planar
+Warning message:
+attribute variables are assumed to be spatially constant throughout all geometries 
+> 
+> ## Get water and limit to Holyoke and major
+> ## See https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2009/TGRSHP09AF.pdf for MTFCC codes
+> hampden_area_water <- area_water(state="MA", county="013")
+Retrieving data for the year 2021
+> holyoke_water <- st_intersection(hampden_area_water,holyoke_acs2020)
+although coordinates are longitude/latitude, st_intersection assumes that they are planar
+Warning message:
+attribute variables are assumed to be spatially constant throughout all geometries 
+> 
+> ## Check roads, water, Wards
+> ## ggplot(data=holyoke_VTD_2020) + geom_sf() + geom_sf_text(aes(label=ward)) +
+> ##     geom_sf(data=holyoke_water, fill="blue") +
+> ##     geom_sf(data=holyoke_roads, color="pink") + 
+> ##     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
+> ##     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+> 
+> 
+> 
+> ## Map Renters, Oil Heat, Utility Gas Heat, Electric Heat, and Allocated Data for Heat
+> ## Renters
+> ## ggplot(holyoke_tracts_acs2020) +
+> ##     geom_sf(aes(fill=renter_occupied_rt), lwd=0) +
+> ##     scale_fill_gradient(low="gray", high="yellow") +
+> ##     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
+> ##     geom_sf(data=holyoke_water, fill="blue") +
+> ##     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
+> ##     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+> 
+> 
+> ## Utility (HGE presumably) Gas heat
+> ggplot(holyoke_tracts_acs2020) +
++     geom_sf(aes(fill=heat_util_gas_rt), lwd=0) +
++     scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
++     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
++     geom_sf(data=holyoke_water, fill="blue") +
++     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
++     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+Warning message:
+In st_point_on_surface.sfc(sf::st_zm(x)) :
+  st_point_on_surface may not give correct results for longitude/latitude data
+> 
+> ## Electric heat
+> ggplot(holyoke_tracts_acs2020) +
++     geom_sf(aes(fill=heat_electricity_rt), lwd=0) +
++     scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
++     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
++     geom_sf(data=holyoke_water, fill="blue") +
++     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
++     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+Warning message:
+In st_point_on_surface.sfc(sf::st_zm(x)) :
+  st_point_on_surface may not give correct results for longitude/latitude data
+> 
+> ## Oil heat
+> ggplot(holyoke_tracts_acs2020) +
++     geom_sf(aes(fill=heat_oil_rt), lwd=0) +
++     scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
++     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
++     geom_sf(data=holyoke_water, fill="blue") +
++     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
++     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+Warning message:
+In st_point_on_surface.sfc(sf::st_zm(x)) :
+  st_point_on_surface may not give correct results for longitude/latitude data
+> 
+> ## Modal (most common) heat source
+> ggplot(holyoke_tracts_acs2020) +
++     geom_sf(aes(fill=modal_heat_source), lwd=0) +
++     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
++     geom_sf(data=holyoke_water, fill="blue") +
++     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
++     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+Warning message:
+In st_point_on_surface.sfc(sf::st_zm(x)) :
+  st_point_on_surface may not give correct results for longitude/latitude data
+> 
+> 
+> ## Allocated (estimated) heat data
+> ggplot(holyoke_tracts_acs2020) +
++     geom_sf(aes(fill=heat_estimated_rt), lwd=0) +
++     scale_fill_gradient(low="gray", high="yellow", limits=c(0,100)) +
++     geom_sf(data=holyoke_VTD_2020, color="darkgray", fill=NA, linewidth=1) +
++     geom_sf(data=holyoke_water, fill="blue") +
++     geom_sf(data=holyoke_roads, color="pink") + ## + geom_sf_text(data=holyoke_roads, aes(label=FULLNAME)) +
++     geom_sf_text(data=holyoke_VTD_2020, aes(label=ward))
+Warning message:
+In st_point_on_surface.sfc(sf::st_zm(x)) :
+  st_point_on_surface may not give correct results for longitude/latitude data
+> 
+> 
+> proc.time()
+   user  system elapsed 
+  3.806   0.593   6.282 
