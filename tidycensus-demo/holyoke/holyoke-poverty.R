@@ -9,6 +9,7 @@ library(tigris)
 options(tigris_use_cache = TRUE)
 library(sp)
 library(sf)
+library(lwgeom)
 options(width=400)
 options(tibble.width=Inf)
 options(rlang_backtrace_on_error = "none")
@@ -137,5 +138,14 @@ st_distance(fossil_ma_sf, holyoke_VTD_2020)
 fossil_ma_sf[23,]
 fossil_ma_sf[39,]
 
+## Place the 66 fossil facilities of Massachusetts in Holyoke if applicable
+st_intersects(fossil_ma_sf, holyoke_VTD_2020, sparse = FALSE)
+st_intersects(fossil_ma_sf, holyoke_VTD_2020, sparse = TRUE)
+st_intersection(fossil_ma_sf, holyoke_VTD_2020)
+
+## Place the 66 fossil facilities of Massachusetts in their towns
+st_intersects(fossil_ma_sf, ma_towns_acs2020, sparse = FALSE)
+st_intersects(fossil_ma_sf, ma_towns_acs2020, sparse = TRUE)
+st_intersection(fossil_ma_sf, ma_towns_acs2020)
 
 ggplot(ma_towns_acs2020) + geom_sf() + geom_sf(data=fossil_ma_sf, aes(color=PLFUELCT))
